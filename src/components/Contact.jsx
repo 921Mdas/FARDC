@@ -1,17 +1,14 @@
 // External imports
 import React from "react";
-import { MeshBasicMaterial, MeshToonMaterial } from "three";
+
 
 // Internal imports
-import ParagraphHelper from "../Helper/Paragraph";
 import LinkHelper from "../Helper/Link";
-import { Text } from "@react-three/drei";
-import { Float } from "@react-three/drei";
 
-const LandingContact = ({ material, font }) => {
+const Contact = ({ material, font }) => {
 
   return (
-    <group position={[-2.8, 0.3, 0]} scale={1.2}>
+    <group position={[-3.1, -0.3, 0]} scale={1.3}>
 
 
       {/* LinkedIn Link */}
@@ -21,7 +18,7 @@ const LandingContact = ({ material, font }) => {
         anchorX={-33}
         anchorY={17}
         material={material}
-        text={`X /`}
+        text={`X `}
         color="black"
         font={font}
         fnClick={() => window.open("https://x.com/DeoGrat82092763", "_blank")}
@@ -35,7 +32,7 @@ const LandingContact = ({ material, font }) => {
         anchorY={17}
         font={font}
         color="black"
-        text={`GITHUB /`}
+        text={`GITHUB`}
         material={material}
         fnClick={() => window.open("https://github.com/921Mdas", "_blank")}
       />
@@ -56,4 +53,4 @@ const LandingContact = ({ material, font }) => {
   );
 };
 
-export default LandingContact;
+export default Contact;

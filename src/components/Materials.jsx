@@ -13,11 +13,11 @@ export class Materials {
     return <MeshTransmissionMaterial {...config} />;
   }
 
-  basic() {
-    return new THREE.MeshBasicMaterial(config);
+  basic(config) {
+    return new THREE.MeshBasicMaterial(config)
   }
 
-  lambert(){
+  lambert(config){
     return new THREE.MeshLambertMaterial(config)
   }
 }

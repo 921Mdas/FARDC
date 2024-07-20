@@ -3,10 +3,15 @@ import React, { useEffect, useRef } from 'react';
 import { useGLTF, Clone, Float, Text  } from '@react-three/drei';
 import * as THREE from 'three';
 import {RigidBody } from "@react-three/rapier";
+import { gsap } from 'gsap';
+
+
 
 
 // Internal imports
-import {LoadModel, setCastShadow, setPrimitiveMaterial} from '../Helper/Helper';
+import {LoadModel, setCastShadow, ObjectAnimate, getExtremeRandom} from '../Helper/Helper';
+import useStore from '../store/store';
+
 // Glb models
 import Rose from '../GLBs/rose.glb';
 import white_rose from '../GLBs/whiterose.glb';
@@ -89,21 +94,41 @@ export const Congo_map = (props)=>{
 }
 
 export const Soldier_head_bust = (props)=>{
-  const model = useGLTF(soldier_head_bust)
-  setCastShadow(model.scene)
-  return (
-   <primitive scale={0.5} position={[0,1.1,0]} rotation={[0,Math.PI * -0.25,0]} object={model.scene} />
+  
+  const model = useGLTF(soldier_head_bust);
+  const objectRef = useRef();
+  const { isSoldierAnimated } = useStore((state) => ({
+    isSoldierAnimated: state.isSoldierAnimated,
+  }));
+  
+
+  ObjectAnimate('soldierfwd',objectRef, isSoldierAnimated);
+  ObjectAnimate('soldierbckwd',objectRef, isSoldierAnimated);
+ 
+
+  useEffect(() => {
+    setCastShadow(model.scene);
+  }, [model.scene]);
+
+
+  return (<>
+  <mesh ref={objectRef}>
+     <primitive scale={0.5} position={[0,1.6,0]} rotation={[0,Math.PI * -0.25,0]} object={model.scene} />
+  </mesh>
+  
+  </>
   )
 }
 
 // Clones of bullets
 export const Bullets = () => {
   const model = useGLTF(bullet);
-  const whiteMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0, metalness: 1 });
+  const whiteMaterial = new THREE.MeshStandardMaterial({ color: 'red', roughness: 0, metalness: 1 });
  
 
   const bullets = [];
   const spacing = 0.5; // Spacing between each rose on the x-axis
+
 
   for (let i = 0; i < 5; i++) {
     const x = i * spacing; // Increment x position by spacing
@@ -117,8 +142,8 @@ export const Bullets = () => {
           key={i}
           object={model.scene}
           scale={0.05}
-          position={[Math.random() * -2, (Math.random() * 10) + 5, 0]} // Use calculated x and y positions, z is fixed at 0
-          rotation={[0, 0, 0]} // Apply rotation on the z-axis
+          position={[getExtremeRandom(0.5, 1.5),getExtremeRandom(0.5, 0.3), getExtremeRandom(0.5,0.5)]} // Use calculated x and y positions, z is fixed at 0
+          rotation={[0, Math.PI * -0.5, 0]} // Apply rotation on the z-axis
           material={whiteMaterial} // Assign the white material to each clone
         />
 
@@ -149,7 +174,7 @@ export const Guns = ({ props }) => {
   }, [pistol_originalet, pistol_originalet2, AK_4747, Rifle,knife]);
 
   return (
-    <group castShadow>
+    <group castShadow position={[0,1,0,]}>
       <Float floatIntensity={0.2} floatingRange={[0, 1]} rotationIntensity={0.1}>
         <primitive  position={[-0.66, -0.12, -1.2]} rotation={[-0.3, -1.63, -0.34]} object={pistol_originalet.scene} scale={0.2} {...props} />
       </Float>
@@ -162,7 +187,7 @@ export const Guns = ({ props }) => {
       <Float floatIntensity={0.2} floatingRange={[0, 1]} rotationIntensity={0.1}>
         <primitive position={[-1.42, -0.35, -2.26]} rotation={[0, -1.58, -0.01]} object={Rifle.scene} scale={20} {...props} />
       </Float>
-      <primitive object={knife.scene} scale={0.5} rotation={[0,0,0.9]} position={[0.6,0,2]} />
+      <primitive object={knife.scene} scale={0.5} rotation={[0,0,0.9]} position={[0.6,-0.5,2]} />
     </group>
   );
 };
