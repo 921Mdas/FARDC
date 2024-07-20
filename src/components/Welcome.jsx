@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
 
-// three
-import { DoubleSide, MeshBasicMaterial, MeshStandardMaterial } from "three";
-import TextureShape from "../Helper/TextureShape";
-import { Decal, OrbitControls, Text } from "@react-three/drei";
+// External imports 
+import React, { useState, useEffect } from "react";
+import { Materials } from "./Materials";
+import { Text } from "@react-three/drei";
 
 // internal imports
-import LandingContact from "./LandingContact";
+import Contact from "./Contact";
 import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
+import { HelperButton } from "../Helper/Helper";
 
+
+// Enter button
 export const BubbleButton = ({ fnClick }) => {
 
   const [hovered, setHovered] = useState(false);
@@ -48,9 +50,12 @@ export const BubbleButton = ({ fnClick }) => {
 
 
 const WelcomePage = ({ SetShowLoadingPage }) => {
+
+  const meshMaterial = new Materials()
+
   return (
     <group>
-        <group position={[2.8, 0, 0]}>
+        <group position={[0, 0, 0]}>
         <Text scale={0.1} color={'black'} anchorX={30} anchorY={-16}   font={RobotoCondensedBold}>
           {"RODEO"}
         </Text>
@@ -61,14 +66,12 @@ const WelcomePage = ({ SetShowLoadingPage }) => {
           {"2024"}
         </Text>
       </group>
-      <BubbleButton
-        fnClick={() => {
+      <HelperButton fnClick={() => {
           SetShowLoadingPage(false);
-        }}
-      />
-
-      <LandingContact
-        material={new MeshBasicMaterial({color:'black'})}
+        }} text="6 MILLION DEAD 🔎" textFont={RobotoCondensedBold}  textColor={'darkred'} />
+     
+      <Contact
+        material={meshMaterial.basic({color:'black'})}
         font={RobotoCondensedBold}
       />
     </group>

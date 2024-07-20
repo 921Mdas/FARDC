@@ -25,6 +25,20 @@ export const THREEJSCENE = () => {
 
   const [showLoadingPage, SetShowLoadingPage] = useState(true);
 
+  const [hoverStates, setHoverStates] = useState({
+    exit: false,
+    next: false,
+    prev: false
+  });
+
+  const handleHoverChange = (key, value) => {
+    setHoverStates((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+
   return (
     <div style={{
       position: "fixed",
@@ -66,26 +80,29 @@ export const THREEJSCENE = () => {
                 <fog attach="fog" args={["white", 0, 40]} />
                 <OrbitControls />
                 <Light />
-                <CameraIntroMovement />
-                <Parallax /> 
-                <UI SetShowLoadingPage={SetShowLoadingPage} font={RobotoCondensedBold} />
+                {/* <CameraIntroMovement /> */} 
+                {/* <Parallax />  */}
+                <UI SetShowLoadingPage={SetShowLoadingPage} font={RobotoCondensedBold} 
+                hoverStates={hoverStates}
+                handleHoverChange={handleHoverChange}
+                />
                 
 
-                <Physics gravity={[0, -5, 0]} >
+                <Physics gravity={[0, 0, 1]} >
                       <group position={[0, -1, 0]}>
                             <Center top center>
                               <RigidBody type='fixed' >
                                   <Soldier_head_bust />
                               </RigidBody>
-                              <RigidBody type='fixed'>
                                   <Guns />
-                              </RigidBody>
                             </Center>
                       </group>
                       <RigidBody colliders='cuboid' type='fixed' >
                            <TexturedPlane />
                       </RigidBody>
+                      <group position={[0,0,-5]}>
                        <Bullets />
+                      </group>
                        <White_rose />
                 </Physics>
                 <Leva hidden />
