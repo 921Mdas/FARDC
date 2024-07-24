@@ -1,7 +1,7 @@
 // External imports
 import React, {useState, Suspense} from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Center } from '@react-three/drei';
+import { OrbitControls, Center, Text3D, Html, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { Leva } from 'leva';
 import { Physics, RigidBody } from "@react-three/rapier";
@@ -9,8 +9,12 @@ import { Physics, RigidBody } from "@react-three/rapier";
 
 // Internal imports (models and objects)
 import { Light } from './components/Light';
-import { Red_rose,Guns, Bullets, Soldier_head_bust, White_rose } from './components/GLBModels';
+import { Red_rose,Guns, Bullets, Soldier_head_bust, White_rose, Skull, FARDC, MineralScene
+ } from './components/GLBModels';
+import Pager from './Helper/Pager';
 import CameraIntroMovement from './components/CameraIntroMove';
+import { useStore } from './store/store';
+import ParagraphHelper from './Helper/Paragraph';
 import Parallax from './components/Parallax';
 import { TexturedPlane } from './components/Objects';
 import UI from './components/UI';
@@ -23,6 +27,7 @@ import RobotoCondensedBold from "./assets/fonts/RbtcBold.ttf";
 // Main Component
 export const THREEJSCENE = () => {
 
+  const {start, playing} = useStore(state => state);
   const [showLoadingPage, SetShowLoadingPage] = useState(true);
 
   const [hoverStates, setHoverStates] = useState({
@@ -75,20 +80,24 @@ export const THREEJSCENE = () => {
          </Suspense>
           
         :
-          <>
-                 
+          <> 
+          
                 <fog attach="fog" args={["white", 0, 40]} />
-                <OrbitControls />
                 <Light />
-                {/* <CameraIntroMovement /> */} 
-                {/* <Parallax />  */}
+                <CameraIntroMovement /> 
+
                 <UI SetShowLoadingPage={SetShowLoadingPage} font={RobotoCondensedBold} 
                 hoverStates={hoverStates}
                 handleHoverChange={handleHoverChange}
                 />
-                
+                <Pager />
+                <mesh position={[2, 1.79, 0]} onClick={start}>
+                  <Text font={RobotoCondensedBold} position={[0, 0, 0.6]} fontSize={0.08} color={playing ? "darkgreen" : "darkred"}>
+                    {playing ? 'SOUND ON' : 'SOUND OFF'}
+                  </Text>
+                </mesh>
 
-                <Physics gravity={[0, 0, 1]} >
+                <Physics gravity={[0, 0, 0.5]} >
                       <group position={[0, -1, 0]}>
                             <Center top center>
                               <RigidBody type='fixed' >
@@ -97,6 +106,8 @@ export const THREEJSCENE = () => {
                                   <Guns />
                             </Center>
                       </group>
+                    
+                        <Skull />
                       <RigidBody colliders='cuboid' type='fixed' >
                            <TexturedPlane />
                       </RigidBody>
@@ -104,7 +115,16 @@ export const THREEJSCENE = () => {
                        <Bullets />
                       </group>
                        <White_rose />
+                       <MineralScene />
                 </Physics>
+
+
+
+               <FARDC/>
+               
+
+
+
                 <Leva hidden />
           </>
       

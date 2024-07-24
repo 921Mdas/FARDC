@@ -55,7 +55,7 @@ const WelcomePage = ({ SetShowLoadingPage }) => {
 
   return (
     <group>
-        <group position={[0, 0, 0]}>
+        <group position={[0, 0.5, 0]}>
         <Text scale={0.1} color={'black'} anchorX={30} anchorY={-16}   font={RobotoCondensedBold}>
           {"RODEO"}
         </Text>
@@ -68,7 +68,7 @@ const WelcomePage = ({ SetShowLoadingPage }) => {
       </group>
       <HelperButton fnClick={() => {
           SetShowLoadingPage(false);
-        }} text="6 MILLION DEAD 🔎" textFont={RobotoCondensedBold}  textColor={'darkred'} />
+        }} text="GENOCIDE IN D.R.CONGO 🔎" textFont={RobotoCondensedBold}  textColor={'darkred'} />
      
       <Contact
         material={meshMaterial.basic({color:'black'})}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Html } from '@react-three/drei';
-import useStore from '../store/store';
+import {useStore} from '../store/store';
 import CameraAnimate from './CameraAnimPos';
 import { Vector3, Euler } from 'three';
 
@@ -47,7 +47,7 @@ const UI = ({ SetShowLoadingPage, font }) => {
 
   return (
     <>
-      <Html position={[-3, 1.5, 0]}>
+      <Html position={[-3, 2, 0]}>
         <div
           style={{ fontFamily: font, fontSize:'30px', color: exitHoverNav ? 'darkred' : 'grey', cursor: 'pointer' }}
           onMouseOver={() => setHoverExitNav(true)}
@@ -58,7 +58,7 @@ const UI = ({ SetShowLoadingPage, font }) => {
         </div>
       </Html>
 
-      <Html position={[-1.59, 0.5, 4]}>
+      <Html position={[-1.48, 0.1, 4]}>
         <div
           style={{ fontFamily: font, fontSize:'40px', color: prevHoverNav ? 'darkred' : 'grey', cursor: 'pointer' }}
           onMouseOver={() => setHoverPrevNav(true)}
@@ -72,7 +72,7 @@ const UI = ({ SetShowLoadingPage, font }) => {
       </Html>
 
 
-      <Html position={[1.5, 0.5, 4]}>
+      <Html position={[1.4, 0.1, 4]}>
         <div
           style={{ position:'fixed',fontSize:'40px',  fontFamily: font, color: nextHoverNav ? 'darkred' : 'grey', cursor: 'pointer' }}
           onMouseOver={() => setHoverNextNav(true)}

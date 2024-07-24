@@ -8,7 +8,7 @@ import LinkHelper from "../Helper/Link";
 const Contact = ({ material, font }) => {
 
   return (
-    <group position={[-3.1, -0.3, 0]} scale={1.3}>
+    <group position={[-3.1, 0.4, 0]} scale={1.3}>
 
 
       {/* LinkedIn Link */}

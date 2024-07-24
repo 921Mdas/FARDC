@@ -1,42 +1,37 @@
-import React, { useState, useEffect } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import React, { useLayoutEffect, useState } from "react";
+import { useFrame, useThree } from "react-three-fiber";
 import { Vector3, Euler, MathUtils } from "three";
-import useStore from "../store/store";
 
 const CameraIntroMovement = () => {
   const { camera } = useThree();
-  const { camInitPos, camFinalPos, camInitRot, camFinalRot } = useStore((state) => ({
-    camInitPos: state.camInitPos,
-    camFinalPos: state.camFinalPos,
-    camInitRot: state.camInitRot,
-    camFinalRot: state.camFinalRot,
-  }));
 
-  // Smoothed camera position and rotation
-  const [smoothedCameraPosition, setSmoothedCameraPosition] = useState(camInitPos.clone());
-  const [smoothedCameraRotation, setSmoothedCameraRotation] = useState(camInitRot.clone());
+  // Initial and final camera positions and rotations
+  const initialCameraPosition = new Vector3(0, 0, 60); // Change this to the initial position you want
+  const initialCameraRotation = new Euler(0, 0, 0); // Change this to the initial rotation you want
 
-  // Update smoothed camera position and rotation when Zustand state changes
-  useEffect(() => {
-    setSmoothedCameraPosition(camInitPos.clone());
-    setSmoothedCameraRotation(camInitRot.clone());
-  }, [camInitPos, camInitRot, camFinalPos, camFinalRot]);
+  const finalCameraPosition = new Vector3(0, 0.5, 8); // Change this to the final position you want
+  const finalCameraRotation = new Euler(0, 0, 0); // Change this to the final rotation you want
+
+  //   Smoothed camera position and rotation
+  const [smoothedCameraPosition] = useState(() =>
+    initialCameraPosition.clone()
+  );
+  const [smoothedCameraRotation] = useState(() =>
+    initialCameraRotation.clone()
+  );
 
   useFrame((_state, delta) => {
-    // Interpolate the camera position
-    smoothedCameraPosition.lerp(camFinalPos, 3.5 * delta);
-
-    // Interpolate the camera rotation
-    smoothedCameraRotation.x = MathUtils.lerp(smoothedCameraRotation.x, camFinalRot.x, 3.5 * delta);
-    smoothedCameraRotation.y = MathUtils.lerp(smoothedCameraRotation.y, camFinalRot.y, 3.5 * delta);
-    smoothedCameraRotation.z = MathUtils.lerp(smoothedCameraRotation.z, camFinalRot.z, 3.5 * delta);
-
-    // Update the camera's position and rotation
+    smoothedCameraPosition.lerp(finalCameraPosition, 5.5 * delta); // Adjust the interpolation speed with the factor (0.5 here)
+    smoothedCameraRotation.y = MathUtils.lerp(
+      smoothedCameraRotation.y,
+      finalCameraRotation.y,
+      5.5 * delta // Adjust the interpolation speed with the factor (0.5 here)
+    );
     camera.position.copy(smoothedCameraPosition);
     camera.rotation.copy(smoothedCameraRotation);
   });
 
-  return null; // No need to render anything
+  return null;
 };
 
 export default CameraIntroMovement;
