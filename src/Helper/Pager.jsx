@@ -5,13 +5,14 @@ import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
 
 
 function Pager() {
-  const { isSoldierAnimated, currentNav } = useStore((state) => ({
+  const { isSoldierAnimated, currentNav, colors } = useStore((state) => ({
     isSoldierAnimated: state.isSoldierAnimated,
-    currentNav: state.currentNav
+    currentNav: state.currentNav,
+    colors:state.colors
   }));
 
   return (
-    <Text font={RobotoCondensedBold} position={[2.5,1.75,0.8]} scale={0.1} color='grey'>Page {currentNav}</Text>
+    <Text  position={[2.67,2,0.8]} scale={0.05} color={colors.darkred}>PAGE {currentNav}</Text>
   )
 }
 

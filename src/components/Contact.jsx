@@ -1,54 +1,31 @@
 // External imports
 import React from "react";
+import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
+import { Html } from "@react-three/drei";
+import { HelperButton, HelperButton3D } from "../Helper/Helper";
+import { faInstagram, faGithub, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+import { useStore } from "../store/store";
+// import FontAwesomeIcon
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
 
-
-// Internal imports
-import LinkHelper from "../Helper/Link";
-
-const Contact = ({ material, font }) => {
+const Contact = (props) => {
+  const {colors} = useStore(state => state)
 
   return (
-    <group position={[-3.1, 0.4, 0]} scale={1.3}>
-
-
-      {/* LinkedIn Link */}
-      <LinkHelper
-        scale={0.06}
-        lineHeight={1.5}
-        anchorX={-33}
-        anchorY={17}
-        material={material}
-        text={`X `}
-        color="black"
-        font={font}
-        fnClick={() => window.open("https://x.com/DeoGrat82092763", "_blank")}
-      />
-      
-      {/* GitHub Link */}
-      <LinkHelper
-        scale={0.06}
-        lineHeight={1.5}
-        anchorX={-35}
-        anchorY={17}
-        font={font}
-        color="black"
-        text={`GITHUB`}
-        material={material}
-        fnClick={() => window.open("https://github.com/921Mdas", "_blank")}
-      />
-      
-      {/* Instagram Link */}
-      <LinkHelper
-        scale={0.06}
-        lineHeight={1.5}
-        anchorX={-40}
-        anchorY={17}
-        font={font}
-        color="black"
-        material={material}
-        text={`INSTAGRAM`}
-        fnClick={() => window.open("https://www.instagram.com/madszee009/", "_blank")}
-      />
+    <group {...props}>
+      <Html>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem',  }}>
+          <a href="https://www.instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">
+            <FontAwesomeIcon icon={faInstagram} size="2x" color={colors.white} />
+          </a>
+          <a href="https://github.com/yourprofile" target="_blank" rel="noopener noreferrer">
+            <FontAwesomeIcon icon={faGithub} size="2x" color={colors.white} />
+          </a>
+          <a href="https://twitter.com/yourprofile" target="_blank" rel="noopener noreferrer">
+            <FontAwesomeIcon icon={faXTwitter} size="2x" color={colors.white} />
+          </a>
+        </div>
+      </Html>
     </group>
   );
 };
