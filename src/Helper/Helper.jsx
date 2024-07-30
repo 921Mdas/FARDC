@@ -1,13 +1,50 @@
-import React,{useEffect, useState} from 'react'
-import { useGLTF, Text } from '@react-three/drei';
+import React,{useEffect, useState, useRef} from 'react'
+import { useGLTF, Text, Text3D, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { gsap } from "gsap";
 import { useFrame, useThree } from "@react-three/fiber";
 import {useStore} from '../store/store';
 import { UseThree } from 'three';
+import { hover } from '@testing-library/user-event/dist/hover';
 
 
+// 
+// Button
+export const HelperButton3D = ({ fnClick, scale=0.3, text, textScale=0.8, textColor, textFont}) => {
 
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    if (hovered) {
+      document.body.style.cursor = "pointer";
+    }
+    return () => {
+      document.body.style.cursor = "auto";
+    };
+  }, [hovered]);
+
+  return (
+    <mesh
+      onClick={() => {
+        fnClick();
+      }}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+      position={[-0.7,0.5,0]}
+      scale={scale}
+    >
+  
+          <Text3D
+          letterSpacing={-0.06} size={0.5} font="/Inter_Bold.json"
+          >
+            WAR IN CONGO
+          
+            <meshBasicMaterial color="white" />
+          </Text3D>
+
+    </mesh>
+  );
+};
 
 
 
@@ -37,9 +74,13 @@ export const setPrimitiveMaterial = (model, material)=>{
 }
 
 // Button
-export const HelperButton = ({ fnClick, scale=0.3, text, textScale=0.8, textColor, textFont}) => {
+export const HelperButton = ({ fnClick, scale=0.3, text, textScale=0.8, textColor, textFont, position}) => {
 
   const [hovered, setHovered] = useState(false);
+  const {colors} = useStore(state => state)
+  const color = new THREE.Color()
+  const ref = useRef()
+
 
   useEffect(() => {
     if (hovered) {
@@ -50,6 +91,10 @@ export const HelperButton = ({ fnClick, scale=0.3, text, textScale=0.8, textColo
     };
   }, [hovered]);
 
+  useFrame(({ camera }) => {
+    ref.current.material.color.lerp(color.set(hovered ? colors.lightred : textColor), 0.1)
+  })
+
   return (
     <mesh
       onClick={() => {
@@ -57,15 +102,15 @@ export const HelperButton = ({ fnClick, scale=0.3, text, textScale=0.8, textColo
       }}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
-      position={[0,0.6,0]}
       scale={scale}
+      position={position}
     >
   
           <Text
+            ref={ref}
             text={text}
             scale={textScale}
             font={textFont}
-            color={textColor}
             fnClick={function () {
               throw new Error("Function not implemented.");
             }}
@@ -96,32 +141,57 @@ export const ObjectAnimate = (name,objectRef, animate) => {
       gsap.to(objectRef.current.position, { duration: 1, y: -3 });
     }
 
+    // if (name === 'pistol_originalfwd' && currentNav === 1) {
+    //   gsap.to(objectRef.current.rotation, { duration: 1, y: -1.5 });
+    //   gsap.to(objectRef.current.position, { duration: 1, y: 0.9, x: -0.5 });
+    // }
     if (name === 'pistol_originalfwd' && currentNav === 1) {
-      gsap.to(objectRef.current.rotation, { duration: 1, y: -1.5 });
-      gsap.to(objectRef.current.position, { duration: 1, y: 0.9, x: -0.5 });
+      gsap.to(objectRef.current.rotation, { duration: 1, y: -3 });
+      gsap.to(objectRef.current.position, { duration: 1, y: 1.7, z:-5, x: -1.8 });
     }
+    // if (name === 'AKfwd' && currentNav === 1) {
+    //   gsap.to(objectRef.current.rotation, { duration: 1, y: -1.6 });
+    //   gsap.to(objectRef.current.position, { duration: 1, x: 1.3, z: -3 });
+    // }
     if (name === 'AKfwd' && currentNav === 1) {
-      gsap.to(objectRef.current.rotation, { duration: 1, y: -1.6 });
-      gsap.to(objectRef.current.position, { duration: 1, x: 1.3, z: -3 });
+      gsap.to(objectRef.current.rotation, { duration: 1, y: -1.4 });
+      gsap.to(objectRef.current.position, { duration: 1, x: 2.5,y:-0.6, z: -3 });
     }
+    // if (name === 'Riflefwd' && currentNav === 1) {
+    //   gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
+    //   gsap.to(objectRef.current.position, { duration: 1, x: -1.7, y: -0.6 });
+    // }
     if (name === 'Riflefwd' && currentNav === 1) {
-      gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
-      gsap.to(objectRef.current.position, { duration: 1, x: -1.7, y: -0.6 });
+      gsap.to(objectRef.current.rotation, { duration: 1, y: -1 });
+      gsap.to(objectRef.current.position, { duration: 1, x: -1.7, y: -1.2, z:-3 });
     }
+    // if (name === 'pistol_clonefwd' && currentNav === 1) {
+    //   gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
+    // }
     if (name === 'pistol_clonefwd' && currentNav === 1) {
-      gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
+      gsap.to(objectRef.current.rotation, { duration: 1, y: 1, });
+      gsap.to(objectRef.current.position, {duration:1, z:-5,x:-0.3, y:0.9})
     }
     if (name === 'skullfwd' && currentNav === 2) {
-       gsap.to(objectRef.current.position, { duration: 1, y: 0.2, delay:0.2 });
+       gsap.to(objectRef.current.position, { duration: 1, y: -0.4, delay:0.2 });
+    }
+    if (name === 'skull2fwd' && currentNav === 2) {
+       gsap.to(objectRef.current.position, { duration: 1, y: -0.5, delay:0.2 });
+    }
+    if (name === 'skull3fwd' && currentNav === 2) {
+       gsap.to(objectRef.current.position, { duration: 1, y: -0.5, delay:0.2 });
     }
     if (name === 'skullfwd' && currentNav === 3) {
        gsap.to(objectRef.current.position, { duration: 1, y: -5, delay:0.2 });
     }
     if (name === 'cemeteryfwd' && currentNav === 2) {
-       gsap.to(objectRef.current.position, { duration: 1, y: -0.3, delay:0.2 });
+       gsap.to(objectRef.current.position, { duration: 1, y: -0.8, delay:0.2 });
     }
     if (name === 'cemeteryfwd' && currentNav === 3) {
        gsap.to(objectRef.current.position, { duration: 1, y: -5, delay:0.2 });
+    }
+    if (name === 'mapfwd' && currentNav === 1) {
+       gsap.to(objectRef.current.position, { duration: 1, y: -0.6, delay:0.2 });
     }
 
     if(name==='to_headline' && currentNav === 1){
@@ -159,10 +229,16 @@ export const ObjectAnimate = (name,objectRef, animate) => {
       gsap.to(objectRef.current.position,  { duration: 1, x: 10 } )
     }
     if(name==='contentthreefwd' && currentNav === 2){
-      gsap.to(objectRef.current.position,  { duration: 1, y: -0.2,z:3 } )
+      gsap.to(objectRef.current.position,  { duration: 1, y: 0, } )
     }
     if(name==='contentthreefwd' && currentNav === 3){
-      gsap.to(objectRef.current.position,  { duration: 1, y: 6 } )
+      gsap.to(objectRef.current.position,  { duration: 1, y: 10 } )
+    }
+    if(name==='contentfourfwd' && currentNav === 1){
+      gsap.to(objectRef.current.position,  { duration: 1, x: 0.1 } )
+    }
+    if(name==='contentfourfwd' && currentNav === 2){
+      gsap.to(objectRef.current.position,  { duration: 1, x: 10 } )
     }
     if(name==='groupefwd' && currentNav === 2){
       gsap.to(objectRef.current.position,  { duration: 1, y: 10 } )
@@ -177,11 +253,12 @@ export const ObjectAnimate = (name,objectRef, animate) => {
     }
     if (name === 'pistol_originalbckwd' && currentNav === 0) {
       gsap.to(objectRef.current.rotation, { duration: 1, y: -3 });
-      gsap.to(objectRef.current.position, { duration: 1, y: -0.12, x: -0.96 });
+      gsap.to(objectRef.current.position, { duration: 1, y: -0.12, x: -0.96, z:-1 });
     }
+
     if (name === 'AKbckwd' && currentNav === 0) {
       gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
-      gsap.to(objectRef.current.position, { duration: 1, x: 0.02, z: -1.48 });
+      gsap.to(objectRef.current.position, { duration: 1, x: 0.02,y:-0.3, z: -1.48 });
     }
     if (name === 'Riflebckwd' && currentNav === 0) {
       gsap.to(objectRef.current.rotation, { duration: 1, y: -1.58 });
@@ -193,6 +270,18 @@ export const ObjectAnimate = (name,objectRef, animate) => {
     }
     if (name === 'skullbckwd' && currentNav === 1) {
       gsap.to(objectRef.current.position, { duration: 1, y: -3, });
+    }
+    if (name === 'skull2bckwd' && currentNav === 1) {
+      gsap.to(objectRef.current.position, { duration: 1, y: -10, });
+    }
+    if (name === 'skull2bckwd' && currentNav === 3) {
+      gsap.to(objectRef.current.position, { duration: 1, y: -10, });
+    }
+    if (name === 'skull3bckwd' && currentNav === 1) {
+      gsap.to(objectRef.current.position, { duration: 1, y: -10, });
+    }
+    if (name === 'skull3bckwd' && currentNav === 3) {
+      gsap.to(objectRef.current.position, { duration: 1, y: -10, });
     }
     if (name === 'cemeterybckwd' && currentNav === 1) {
       gsap.to(objectRef.current.position, { duration: 1, y: -5, });
@@ -223,7 +312,12 @@ export const ObjectAnimate = (name,objectRef, animate) => {
       gsap.to(objectRef.current.position,  { duration: 1, x: 10 } )
     }
     if(name==='contentthreebckwd' && currentNav === 1){
-      gsap.to(objectRef.current.position,  { duration: 1, y: 6 } )
+      gsap.to(objectRef.current.position,  { duration: 1, y:  10} )
+
+    }
+
+    if(name==='contentFourbckwd' && currentNav === 0){
+      gsap.to(objectRef.current.position,  { duration: 1, x: 10 } )
     }
 
      if(name==='groupebckwd' && currentNav === 1){
@@ -231,6 +325,12 @@ export const ObjectAnimate = (name,objectRef, animate) => {
     }
      if(name==='contentimagebckwd' && currentNav === 2){
       gsap.to(objectRef.current.position,  { duration: 1, y: -10 } )
+    }
+    if (name === 'mapfwd' && currentNav === 0) {
+       gsap.to(objectRef.current.position, { duration: 1, y: -10, delay:0.2 });
+    }
+    if (name === 'mapfwd' && currentNav === 2) {
+       gsap.to(objectRef.current.position, { duration: 1, y: -10, delay:0.2 });
     }
 
   }, [animate, objectRef, name, currentNav]);
@@ -262,3 +362,48 @@ export const useCameraAnimate = (objectRef, animate, pos, duration, delay) => {
     return Math.random() * (extreme - 1.0) + 1.0;
   }
 }
+
+
+export const AnimatedCounter = ({ shouldAnimate, position, scale }) => {
+  const contentRefThree = useRef(null);
+  const countRef = useRef(0);
+  const startTime = useRef(null);
+  const {colors} = useStore(state => state);
+
+  const finalCount = 6000000;
+  const duration = 3; // Duration in seconds
+
+  useFrame(({ clock }) => {
+    if (!shouldAnimate) {
+      startTime.current = null;
+      countRef.current = 0;
+      if (contentRefThree.current) {
+        contentRefThree.current.innerText = '0';
+      }
+      return;
+    }
+
+    if (!startTime.current) startTime.current = clock.getElapsedTime();
+    const elapsed = clock.getElapsedTime() - startTime.current;
+
+    if (elapsed < duration) {
+      const newCount = (elapsed / duration) * finalCount;
+      countRef.current = newCount;
+      if (contentRefThree.current) {
+        contentRefThree.current.innerText = Math.floor(newCount).toLocaleString();
+      }
+    } else {
+      countRef.current = finalCount;
+      if (contentRefThree.current) {
+        contentRefThree.current.innerText = finalCount.toLocaleString();
+      }
+    }
+  });
+
+  return (
+    <Html position={position} scale={scale}>
+      <div ref={contentRefThree} style={{fontSize:'5rem', fontWeight:'bolder', color:colors.lightred }}>0</div>
+      <div style={{fontSize:'2rem', fontWeight:'bolder', color:colors.lightred}}>Murdered</div>
+    </Html>
+  );
+};

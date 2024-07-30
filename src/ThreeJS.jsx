@@ -9,7 +9,7 @@ import { Physics, RigidBody } from "@react-three/rapier";
 
 // Internal imports (models and objects)
 import { Light } from './components/Light';
-import { Red_rose,Guns, Bullets, Soldier_head_bust, White_rose, Skull, FARDC, MineralScene
+import { Red_rose,VideoScene ,Guns, Bullets, Soldier_head_bust, White_rose, Skull,Congo_map, FARDC, MineralScene
  } from './components/GLBModels';
 import Pager from './Helper/Pager';
 import CameraIntroMovement from './components/CameraIntroMove';
@@ -24,17 +24,21 @@ import RobotoCondensedBold from "./assets/fonts/RbtcBold.ttf";
 // Textures
 
 
+
 // Main Component
 export const THREEJSCENE = () => {
 
-  const {start, playing} = useStore(state => state);
-  const [showLoadingPage, SetShowLoadingPage] = useState(true);
 
   const [hoverStates, setHoverStates] = useState({
     exit: false,
     next: false,
     prev: false
   });
+
+  const {showLoadingPage, setShowLoadingPage} = useStore((state)=>({
+    showLoadingPage:  state.showLoadingPage,
+    setShowLoadingPage: state.setShowLoadingPage
+  }))
 
   const handleHoverChange = (key, value) => {
     setHoverStates((prev) => ({
@@ -59,6 +63,7 @@ export const THREEJSCENE = () => {
           fov: 25,
         }}
         shadows
+        dpr={[1,2]}
         gl={{
           alpha: false,
           toneMapping: THREE.ACESFilmicToneMapping,
@@ -70,32 +75,19 @@ export const THREEJSCENE = () => {
           gl.setClearAlpha(1);
           gl.gasoldier_head_bustaOutput = true;
         }}
-      >
-        {showLoadingPage 
-        
-        ? 
-         <Suspense fallback={null}>
-             <WelcomePage SetShowLoadingPage={SetShowLoadingPage} />
-            <Leva hidden={true} />
-         </Suspense>
-          
-        :
-          <> 
-          
+      > 
                 <fog attach="fog" args={["white", 0, 40]} />
                 <Light />
                 <CameraIntroMovement /> 
+                {/* <OrbitControls /> */}
 
-                <UI SetShowLoadingPage={SetShowLoadingPage} font={RobotoCondensedBold} 
+
+                <UI SetShowLoadingPage={setShowLoadingPage} font={RobotoCondensedBold} 
                 hoverStates={hoverStates}
                 handleHoverChange={handleHoverChange}
                 />
                 <Pager />
-                <mesh position={[2, 1.79, 0]} onClick={start}>
-                  <Text font={RobotoCondensedBold} position={[0, 0, 0.6]} fontSize={0.08} color={playing ? "darkgreen" : "darkred"}>
-                    {playing ? 'SOUND ON' : 'SOUND OFF'}
-                  </Text>
-                </mesh>
+               
 
                 <Physics gravity={[0, 0, 0.5]} >
                       <group position={[0, -1, 0]}>
@@ -118,17 +110,13 @@ export const THREEJSCENE = () => {
                        <MineralScene />
                 </Physics>
 
-
-
                <FARDC/>
+              <Congo_map />
+              <VideoScene />
                
-
-
-
                 <Leva hidden />
-          </>
-      
-         }        
+    
+        
       </Canvas>
     </div>
   );
