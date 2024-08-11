@@ -1,11 +1,9 @@
 import React,{useEffect, useState, useRef} from 'react'
-import { useGLTF, Text, Text3D, Html } from '@react-three/drei';
+import { Text, Text3D, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { gsap } from "gsap";
 import { useFrame, useThree } from "@react-three/fiber";
 import {useStore} from '../store/store';
-import { UseThree } from 'three';
-import { hover } from '@testing-library/user-event/dist/hover';
 
 
 // 
@@ -73,6 +71,28 @@ export const setPrimitiveMaterial = (model, material)=>{
     return null
 }
 
+// hoverState
+
+export const useHoverEffect = (ref, textColor) => {
+  const [hovered, setHovered] = useState(false);
+  const { colors } = useStore((state) => state);
+  const color = new THREE.Color();
+
+  useEffect(() => {
+    if (hovered) {
+      document.body.style.cursor = 'pointer';
+    }
+    return () => {
+      document.body.style.cursor = 'auto';
+    };
+  }, [hovered]);
+
+  useFrame(() => {
+    ref.current.material.color.lerp(color.set(hovered ? colors.lightred : textColor), 0.1);
+  });
+
+  return [hovered, setHovered];
+};
 // Button
 export const HelperButton = ({ fnClick, scale=0.3, text, textScale=0.8, textColor, textFont, position}) => {
 
@@ -91,7 +111,7 @@ export const HelperButton = ({ fnClick, scale=0.3, text, textScale=0.8, textColo
     };
   }, [hovered]);
 
-  useFrame(({ camera }) => {
+  useFrame(() => {
     ref.current.material.color.lerp(color.set(hovered ? colors.lightred : textColor), 0.1)
   })
 
@@ -135,45 +155,44 @@ export const ObjectAnimate = (name,objectRef, animate) => {
   }
   
   useEffect(() => {
+
    
     // Forward animation
     if (name === 'soldierfwd' && currentNav === 1) {
       gsap.to(objectRef.current.position, { duration: 1, y: -3 });
     }
+    if (name === 'congofwd' && currentNav === 1) {
+      gsap.to(objectRef.current.position, { duration: 1.5, z: 1 });
+    }
+    if (name === 'contentrefFinalfwd' && currentNav === 3) {
+      gsap.to(objectRef.current.position, { duration: 1.5, y:2 });
+    }
+ 
+    if (name === 'congofwd' && currentNav === 2) {
+      gsap.to(objectRef.current.position, { duration: 1, z: -20 });
+    }
 
-    // if (name === 'pistol_originalfwd' && currentNav === 1) {
-    //   gsap.to(objectRef.current.rotation, { duration: 1, y: -1.5 });
-    //   gsap.to(objectRef.current.position, { duration: 1, y: 0.9, x: -0.5 });
-    // }
     if (name === 'pistol_originalfwd' && currentNav === 1) {
       gsap.to(objectRef.current.rotation, { duration: 1, y: -3 });
-      gsap.to(objectRef.current.position, { duration: 1, y: 1.7, z:-5, x: -1.8 });
+      gsap.to(objectRef.current.position, { duration: 1, y: 2.5, z:-10, x: -2 });
     }
-    // if (name === 'AKfwd' && currentNav === 1) {
-    //   gsap.to(objectRef.current.rotation, { duration: 1, y: -1.6 });
-    //   gsap.to(objectRef.current.position, { duration: 1, x: 1.3, z: -3 });
-    // }
+
     if (name === 'AKfwd' && currentNav === 1) {
-      gsap.to(objectRef.current.rotation, { duration: 1, y: -1.4 });
-      gsap.to(objectRef.current.position, { duration: 1, x: 2.5,y:-0.6, z: -3 });
+      gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
+      gsap.to(objectRef.current.position, { duration: 1, x: 2.5,y:-1.8, z: -10 });
     }
-    // if (name === 'Riflefwd' && currentNav === 1) {
-    //   gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
-    //   gsap.to(objectRef.current.position, { duration: 1, x: -1.7, y: -0.6 });
-    // }
+  
     if (name === 'Riflefwd' && currentNav === 1) {
-      gsap.to(objectRef.current.rotation, { duration: 1, y: -1 });
-      gsap.to(objectRef.current.position, { duration: 1, x: -1.7, y: -1.2, z:-3 });
+      gsap.to(objectRef.current.rotation, { duration: 1, y: -1.5 });
+      gsap.to(objectRef.current.position, { duration: 1, x: -2.9, y: -1.2, z:-8 });
     }
-    // if (name === 'pistol_clonefwd' && currentNav === 1) {
-    //   gsap.to(objectRef.current.rotation, { duration: 1, y: 0 });
-    // }
+ 
     if (name === 'pistol_clonefwd' && currentNav === 1) {
       gsap.to(objectRef.current.rotation, { duration: 1, y: 1, });
-      gsap.to(objectRef.current.position, {duration:1, z:-5,x:-0.3, y:0.9})
+      gsap.to(objectRef.current.position, {duration:1, z:-10,x:2.5, y:0.9})
     }
     if (name === 'skullfwd' && currentNav === 2) {
-       gsap.to(objectRef.current.position, { duration: 1, y: -0.4, delay:0.2 });
+       gsap.to(objectRef.current.position, { duration: 1, y: -0.6, delay:0.2 });
     }
     if (name === 'skull2fwd' && currentNav === 2) {
        gsap.to(objectRef.current.position, { duration: 1, y: -0.5, delay:0.2 });
@@ -210,6 +229,14 @@ export const ObjectAnimate = (name,objectRef, animate) => {
       gsap.to(objectRef.current.position,  { duration: 5, y: 5 } )
       gsap.to(objectRef.current.rotation,  { duration: 5, y: Math.PI } )
     }
+    if(name==='rosefwd' && currentNav === 2){
+      gsap.to(objectRef.current.position,  { duration: 5, y: -0.4 } )
+      gsap.to(objectRef.current.rotation,  { duration: 5, y: Math.PI * -0.2 } )
+    }
+    if(name==='rosefwd' && currentNav === 3){
+      gsap.to(objectRef.current.position,  { duration: 5, y: 10 } )
+      gsap.to(objectRef.current.rotation,  { duration: 5, y: Math.PI * -0.2 } )
+    }
     if(name==='mineralfwd' && currentNav === 1){
       gsap.to(objectRef.current.position,  { duration: 1, y: 0.5, z:0 } )
     }
@@ -217,25 +244,38 @@ export const ObjectAnimate = (name,objectRef, animate) => {
       gsap.to(objectRef.current.position,  { duration: 1, y: -3, z:0 } )
     }
     if(name==='contentonefwd' && currentNav === 1){
-      gsap.to(objectRef.current.position,  { duration: 1, x: -1.6 } )
+      gsap.to(objectRef.current.position,  { duration: 1, x: -1.5, y:1.3 } )
     }
     if(name==='contentonefwd' && currentNav === 2){
       gsap.to(objectRef.current.position,  { duration: 1, x: -10 } )
     }
     if(name==='contenttwofwd' && currentNav === 1){
-      gsap.to(objectRef.current.position,  { duration: 1, x: -0.1 } )
+      gsap.to(objectRef.current.position,  { duration: 1, x: 0.7, delay:0.5 } )
     }
     if(name==='contenttwofwd' && currentNav === 2){
       gsap.to(objectRef.current.position,  { duration: 1, x: 10 } )
     }
     if(name==='contentthreefwd' && currentNav === 2){
-      gsap.to(objectRef.current.position,  { duration: 1, y: 0, } )
+      gsap.to(objectRef.current.position,  { duration: 1, y: -0.5, } )
     }
     if(name==='contentthreefwd' && currentNav === 3){
       gsap.to(objectRef.current.position,  { duration: 1, y: 10 } )
     }
+    if(name==='contentref32fwd' && currentNav === 2){
+      gsap.to(objectRef.current.position,  { duration: 1, y: 0 } )
+    }
+    if(name==='contentref32fwd' && currentNav === 3){
+      gsap.to(objectRef.current.position,  { duration: 1, y: 10 } )
+    }
+    if(name==='contentref33fwd' && currentNav === 2){
+      gsap.to(objectRef.current.position,  { duration: 1, y: 0 } )
+    }
+    if(name==='contentref33fwd' && currentNav === 3){
+      gsap.to(objectRef.current.position,  { duration: 1, y: 10 } )
+    }
+   
     if(name==='contentfourfwd' && currentNav === 1){
-      gsap.to(objectRef.current.position,  { duration: 1, x: 0.1 } )
+      gsap.to(objectRef.current.position,  { duration: 1, x: -2, y:0.2, delay:0.7 } )
     }
     if(name==='contentfourfwd' && currentNav === 2){
       gsap.to(objectRef.current.position,  { duration: 1, x: 10 } )
@@ -246,10 +286,34 @@ export const ObjectAnimate = (name,objectRef, animate) => {
     if(name==='contentimagefwd' && currentNav === 3){
       gsap.to(objectRef.current.position,  { duration: 1, y: 0 } )
     }
+    if(name==='staireffwd' && currentNav === 2){
+      gsap.to(objectRef.current.position,  { duration: 1, y: -0.2 } )
+    }
+    if(name==='staireffwd' && currentNav === 3){
+      gsap.to(objectRef.current.position,  { duration: 1, y: -10 } )
+    }
+  
 
     // Backward animation
     if (name === 'soldierbckwd' && currentNav === 0) {
       gsap.to(objectRef.current.position, { duration: 1, y: 0 });
+    }
+    if (name === 'contentrefFinalbckwd' && currentNav === 2) {
+      gsap.to(objectRef.current.position, { duration: 1.5, y: 10 });
+    }
+
+    if (name === 'congobckwd' && currentNav === 0) {
+      gsap.to(objectRef.current.position, { duration: 1, z: -20 });
+    }
+    if(name==='stairefbckwd' && currentNav === 1){
+      gsap.to(objectRef.current.position,  { duration: 1, y: -10 } )
+    }
+
+     if(name==='contentref33bckwd' && currentNav === 1){
+      gsap.to(objectRef.current.position,  { duration: 1, y: 10 } )
+    }
+     if(name==='contentref32bckwd' && currentNav === 1){
+      gsap.to(objectRef.current.position,  { duration: 1, y: 10 } )
     }
     if (name === 'pistol_originalbckwd' && currentNav === 0) {
       gsap.to(objectRef.current.rotation, { duration: 1, y: -3 });
@@ -337,17 +401,6 @@ export const ObjectAnimate = (name,objectRef, animate) => {
 };
 
 
-// animateCamera Helper
-export const useCameraAnimate = (objectRef, animate, pos, duration, delay) => {
-  const {camera} = useThree()
-
-  useEffect(() => {
-    if (camera && animate) {
-      gsap.to(camera.rotation, { duration, ...pos, delay  });
-      gsap.to(camera.position, { duration, ...pos, delay  });
-    }
-  }, [objectRef, animate, pos, duration]);
-};
 
 
 // random extreme numbers
@@ -364,13 +417,13 @@ export const useCameraAnimate = (objectRef, animate, pos, duration, delay) => {
 }
 
 
-export const AnimatedCounter = ({ shouldAnimate, position, scale }) => {
+export const AnimatedCounter = ({ shouldAnimate, position, scale, countTo, subtext }) => {
   const contentRefThree = useRef(null);
   const countRef = useRef(0);
   const startTime = useRef(null);
   const {colors} = useStore(state => state);
 
-  const finalCount = 6000000;
+  const finalCount = countTo;
   const duration = 3; // Duration in seconds
 
   useFrame(({ clock }) => {
@@ -402,8 +455,8 @@ export const AnimatedCounter = ({ shouldAnimate, position, scale }) => {
 
   return (
     <Html position={position} scale={scale}>
-      <div ref={contentRefThree} style={{fontSize:'5rem', fontWeight:'bolder', color:colors.lightred }}>0</div>
-      <div style={{fontSize:'2rem', fontWeight:'bolder', color:colors.lightred}}>Murdered</div>
+      <div style={{fontSize:'2rem', fontWeight:'bolder', color:colors.lightred, textTransform:'capitalize', }}>{subtext}</div>
+      <div ref={contentRefThree} style={{fontSize:'3rem', fontWeight:'bolder', color:colors.lightred }}>0</div>
     </Html>
   );
 };

@@ -5,30 +5,34 @@ import { addEffect } from "@react-three/fiber";
 let audio, audioContext, sourceNode, analyzerNode, audioData;
 let gainNode;
 
-// Audio API
 const createAudio = (url) => {
   try {
-    audio = document.createElement("audio");
-    audio.src = url;
+    if (!audio) {
+      audio = new Audio(url);
+    } else {
+      audio.src = url;
+    }
 
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    sourceNode = audioContext.createMediaElementSource(audio);
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
 
-    analyzerNode = audioContext.createAnalyser();
-    sourceNode.connect(analyzerNode);
+    if (!sourceNode) {
+      sourceNode = audioContext.createMediaElementSource(audio);
+      analyzerNode = audioContext.createAnalyser();
+      sourceNode.connect(analyzerNode);
 
-    gainNode = audioContext.createGain();
-    gainNode.gain.value = 0.1;
+      gainNode = audioContext.createGain();
+      gainNode.gain.value = 0.1;
 
-    sourceNode.loop = false; // Set loop to false to handle it manually
-    gainNode.connect(audioContext.destination);
+      sourceNode.loop = false;
+      gainNode.connect(audioContext.destination);
+      analyzerNode.connect(gainNode);
+      analyzerNode.fftSize = 512;
+      audioData = new Float32Array(analyzerNode.frequencyBinCount);
 
-    analyzerNode.connect(gainNode);
-    analyzerNode.fftSize = 512;
-
-    audioData = new Float32Array(analyzerNode?.frequencyBinCount);
-
-    audio.addEventListener('ended', handleSongEnd); // Add event listener for when the audio ends
+      audio.addEventListener('ended', handleSongEnd);
+    }
 
     console.log("Audio created and nodes connected");
 
@@ -48,11 +52,11 @@ const handleSongEnd = () => {
 };
 
 export const useStore = create((set, get) => ({
-  // welcome loader
+  // Welcome loader
   showLoadingPage: true,
   setShowLoadingPage: (loading) => set({ showLoadingPage: loading }),
 
-  // colors & fonts
+  // Colors & fonts
   colors: {
     black: '#1c162e',
     darkred: "#3c162e",
@@ -78,6 +82,10 @@ export const useStore = create((set, get) => ({
   camInitRot: new Euler(MathUtils.degToRad(10), 0, 0),
   camFinalRot: new Euler(0, 0, 0),
 
+  // Performance
+  perfsucks: false,
+  deprecate: (hasdepreciated) => set({ perfsucks: hasdepreciated }),
+
   // Object movement
   isSoldierAnimated: false,
   soldierPos: new Vector3(0, 2.5, 20),
@@ -87,7 +95,7 @@ export const useStore = create((set, get) => ({
   setCurrentNavPrevPage: () => set((state) => ({ currentNav: state.currentNav > 0 ? state.currentNav - 1 : 0 })),
 
   // Audio state
-  songs: ['/TwoStepsV.mp3','/PJS.mp3','/Stop.mp3'], // List of songs
+  songs: ['/Forsaken.mp3'], // List of songs
   currentSongIndex: 0,
   playing: false,
   ended: false,
@@ -99,27 +107,27 @@ export const useStore = create((set, get) => ({
 
   setCurrentSongIndex: (index) => set({ currentSongIndex: index }),
 
-  // avg: () => {
-  //   let value = 0;
-  //   for (let i = 0; i < audioData.length; i++) value += audioData[i];
-  //   const average = value / audioData.length;
-  //   set({ average });
-  // },
+  avg: () => {
+    let value = 0;
+    for (let i = 0; i < audioData.length; i++) value += audioData[i];
+    const average = value / audioData.length;
+    set({ average });
+  },
 
-  // updateAudioData: () => {
-  //   addEffect(() => {
-  //     if (!audioData) return;
-  //     analyzerNode?.getFloatFrequencyData(audioData);
-  //     set({ songData: [...audioData] }); // Copy audioData to trigger re-render
-  //     get().avg();
-  //     console.log("Audio data updated");
-  //   });
-  // },
+  updateAudioData: () => {
+    addEffect(() => {
+      if (!audioData) return;
+      analyzerNode?.getFloatFrequencyData(audioData);
+      get().avg(); // Call avg() to update the average
+      set({ songData: Array.from(audioData) }); // Copy audioData to trigger re-render
+      console.log("Audio data updated");
+    });
+  },
 
-  // updateSongData: () => {
-  //   set({ songData: audioData });
-  //   console.log("Song data updated");
-  // },
+  updateSongData: () => {
+    set({ songData: audioData });
+    console.log("Song data updated");
+  },
 
   start: () => {
     if (!audioContext) createAudio(get().songs[get().currentSongIndex]);
@@ -132,19 +140,18 @@ export const useStore = create((set, get) => ({
       set({ playing: false, isAudioPaused: true });
       console.log("Audio paused");
     }
-    // get().updateAudioData();
   },
 
   reset: () => {
     set({ ended: false, paused: true, playing: false });
     console.log("Audio reset");
   },
-  
+
   end: (status) => {
     set({ ended: status });
     console.log("Audio ended:", status);
   },
-  
+
   pausing: (status) => {
     set({ paused: status });
     console.log("Audio paused status:", status);
@@ -152,4 +159,4 @@ export const useStore = create((set, get) => ({
 }));
 
 // Debug: Log changes in the store to verify updates
-// useStore.subscribe((state) => console.log('State changed:', state));
+useStore.subscribe((state) => console.log('State changed:', state));

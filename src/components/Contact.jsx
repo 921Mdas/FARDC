@@ -1,12 +1,10 @@
 // External imports
 import React from "react";
-import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
 import { Html } from "@react-three/drei";
-import { HelperButton, HelperButton3D } from "../Helper/Helper";
 import { faInstagram, faGithub, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
 import { useStore } from "../store/store";
 // import FontAwesomeIcon
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
 
 const Contact = (props) => {
   const {colors} = useStore(state => state)

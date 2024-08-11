@@ -1,156 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { Center, Html, Text } from '@react-three/drei';
-import {useStore} from '../store/store';
-import CameraAnimate from './CameraAnimPos';
-import { Vector3, Euler } from 'three';
-import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import { Html } from '@react-three/drei';
+import { useStore } from '../store/store';
 
 
+const UI = React.memo(({ SetShowLoadingPage, font }) => {
+ 
+  const {
+    playing,
+    start,
+    setSoldierAnimate,
+    setCurrentNavNextPage,
+    setCurrentNavPrevPage,
+    colors
+  } = useStore(state => state);
 
-const UI = ({ SetShowLoadingPage, font }) => {
-  const {playing, start, setSoundHover, soundHover, exitHoverNav, nextHoverNav,
-       prevHoverNav, setHoverNextNav, 
-       setHoverPrevNav, setHoverExitNav
-     , setSoldierPos, setSoldierAnimate, setCurrentNavNextPage, setCurrentNavPrevPage} = useStore((state) => ({
-    exitHoverNav: state.exitHoverNav,
-    nextHoverNav: state.nextHoverNav,
-    prevHoverNav: state.prevHoverNav,
-    soundHover: state.soundHover,
-    setHoverExitNav: state.setHoverExitNav,
-    setHoverNextNav: state.setHoverNextNav,
-    setHoverPrevNav: state.setHoverPrevNav,
-    setSoundHover: state.setSoundHover,
-    playing:state.playing,
-    start: state.start,
+  const [hoverState, setHoverState] = useState({
+    exit: false,
+    prev: false,
+    next: false,
+    sound: false,
+  });
 
-    // soldier bust functions
-    setSoldierPos: state.setSoldierPos,
-    setSoldierAnimate: state.setSoldierAnimate,
+  const handleMouseOver = useCallback((key) => {
+    setHoverState((prev) => ({ ...prev, [key]: true }));
+    document.body.style.cursor = 'pointer';
+  }, []);
 
-    // navigation
-    setCurrentNavNextPage: state.setCurrentNavNextPage,
-    setCurrentNavPrevPage: state.setCurrentNavPrevPage
-  }));
-
-
-  const [animateCamera, setAnimateCamera] = useState(false);
-
+  const handleMouseOut = useCallback((key) => {
+    setHoverState((prev) => ({ ...prev, [key]: false }));
+    document.body.style.cursor = 'auto';
+  }, []);
 
   useEffect(() => {
-    if (exitHoverNav || nextHoverNav || prevHoverNav || soundHover ) {
-      document.body.style.cursor = 'pointer';
-    } else {
-      document.body.style.cursor = 'auto';
-    }
-  }, [exitHoverNav, nextHoverNav, prevHoverNav, soundHover]);
+    document.body.style.cursor = hoverState.exit || hoverState.next || hoverState.prev || hoverState.sound ? 'pointer' : 'auto';
+  }, [hoverState]);
 
-  const handleCameraAnimate = () => {
-    setAnimateCamera(true);
-  };
-
-  const handleObjectAnimate = () => {
-    setSoldierAnimate(true)
-  };
+  const styles = useMemo(() => ({
+    exit: {
+      fontSize: '30px',
+      textAlign: 'center',
+      display: 'grid',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '50px',
+      width: '50px',
+      color: hoverState.exit ? 'darkred' : 'white',
+      borderRadius: '50%',
+      fontWeight: 'bolder',
+      padding: 0,
+      transition: 'color 0.3s',
+    },
+    prev: {
+      fontFamily: font,
+      fontSize: '50px',
+      textAlign: 'center',
+      display: 'grid',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '50px',
+      width: '50px',
+      color: hoverState.prev ? 'darkred' : 'white',
+      borderRadius: '50%',
+      fontWeight: 'bolder',
+      padding: 0,
+      transition: 'color 0.3s',
+    },
+    next: {
+      fontFamily: font,
+      fontSize: '50px',
+      textAlign: 'center',
+      display: 'grid',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '50px',
+      width: '50px',
+      color: hoverState.next ? 'darkred' : 'white',
+      borderRadius: '50%',
+      fontWeight: 'bolder',
+      padding: 0,
+      transition: 'color 0.3s',
+    },
+    sound: {
+      fontFamily: font,
+      fontSize: '25px',
+      width: '100px',
+      color: hoverState.sound ? 'white' : 'grey',
+      fontWeight: 'bolder',
+      padding: 0,
+      transition: 'color 0.3s',
+    },
+  }), [hoverState, font]);
 
   return (
     <>
       <Html position={[-3.1, 2.2, 0]}>
         <div
-          style={{ fontSize: '30px',
-      textAlign: 'center', // Center text horizontally
-      display: 'grid',
-      justifyContent: 'center', // Center content horizontally
-      alignItems: 'center', // Center content vertically
-      height: '50px', // Set height to ensure vertical centering
-      width: '50px', // Set width to ensure horizontal centering
-      color: exitHoverNav ? 'darkred' : 'white',
-      borderRadius:'50%',
-      fontWeight:'bolder',
-      backgroundColor:'',
-      padding:0 }}
-          onMouseOver={() => setHoverExitNav(true)}
-          onMouseOut={() => setHoverExitNav(false)}
+          style={styles.exit}
+          onMouseOver={() => handleMouseOver('exit')}
+          onMouseOut={() => handleMouseOut('exit')}
           onClick={() => SetShowLoadingPage(true)}
         >
-          ⏎
+          ⎋
         </div>
       </Html>
 
-      <Html position={[-0.8, 0, 4]}>
+      <Html position={[-1.5, 0, 4]}>
         <div
-          style={{ 
-
-     fontFamily: font,
-      fontSize: '50px',
-      textAlign: 'center', // Center text horizontally
-      display: 'grid',
-      justifyContent: 'center', // Center content horizontally
-      alignItems: 'center', // Center content vertically
-      height: '50px', // Set height to ensure vertical centering
-      width: '50px', // Set width to ensure horizontal centering
-      color: prevHoverNav ? 'darkred' : 'white',
-      borderRadius:'50%',
-      fontWeight:'bolder',
-      backgroundColor:'',
-      padding:0
-          }}
-          onMouseOver={() => setHoverPrevNav(true)}
-          onMouseOut={() => setHoverPrevNav(false)}
-          onClick={()=>
-            setCurrentNavPrevPage()
-          }
+          style={styles.prev}
+          onMouseOver={() => handleMouseOver('prev')}
+          onMouseOut={() => handleMouseOut('prev')}
+          onClick={setCurrentNavPrevPage}
         >
-          {'<'}
+          {'◀︎'}
         </div>
       </Html>
 
-
-      <Html position={[-0.4, 0, 4]}>
+      <Html position={[1.4, 0, 4]}>
         <div
-          style={{ fontFamily: font,
-      fontSize: '50px',
-      textAlign: 'center', // Center text horizontally
-      display: 'grid',
-      justifyContent: 'center', // Center content horizontally
-      alignItems: 'center', // Center content vertically
-      height: '50px', // Set height to ensure vertical centering
-      width: '50px', // Set width to ensure horizontal centering
-      color: nextHoverNav ? 'darkred' : 'white',
-      borderRadius:'50%',
-      fontWeight:'bolder',
-      backgroundColor:'',
-      padding:0 }}
-          onMouseOver={() => setHoverNextNav(true)}
-          onMouseOut={() => setHoverNextNav(false)}
-          onClick={()=>{handleObjectAnimate()
-          setCurrentNavNextPage()
+          style={styles.next}
+          onMouseOver={() => handleMouseOver('next')}
+          onMouseOut={() => handleMouseOut('next')}
+          onClick={() => {
+            setSoldierAnimate(true);
+            setCurrentNavNextPage();
           }}
         >
-          {'>'}
+          {'▶︎'}
         </div>
       </Html>
 
-       <Html   position={[2.68, 2.1, 0]} >
-                  <div onClick={start} onMouseOver={() => setSoundHover(true)}
-          onMouseOut={() => setSoundHover(false)}  style={{ fontFamily: font,
-      fontSize: '12px',
-      width: '100px', // Set width to ensure horizontal centering
-      color: playing ? 'white' : 'grey',
-      fontWeight:'bolder',
-      padding:0 }} >
-                    {playing ? 'SOUND ON' : 'SOUND OFF'}
-                  </div>
-       </Html>
-      
-      {animateCamera && (
-        <CameraAnimate
-          finalPosition={new Vector3(0.5, 0, 0)}
-          finalRotation={new Euler(0, 0, 0)}
-          duration={1}
-        />
-      )}
+      <Html position={[2.70, 2.1, 0]}>
+        <div
+          onClick={start}
+          onMouseOver={() => handleMouseOver('sound')}
+          onMouseOut={() => handleMouseOut('sound')}
+          style={styles.sound}
+        >
+          
+          {playing ? "🔉" : "🔇"}
+        </div>
+      </Html>
     </>
   );
-};
+});
 
 export default UI;

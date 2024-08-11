@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { useMemo } from 'react'
 
 export default function CurvedPlane({ width, height, radius, children, ...props }) {
-  const { geometry, heightMin, heightMax } = useMemo(() => curvedPlaneGeometry(width, height, radius), [width, height, radius])
+  const { geometry, heightMax } = useMemo(() => curvedPlaneGeometry(width, height, radius), [width, height, radius])
 
   return (
     <group {...props}>
