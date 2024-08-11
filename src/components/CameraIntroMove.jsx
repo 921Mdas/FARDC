@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import  { useState } from "react";
 import { useFrame, useThree } from "react-three-fiber";
 import { Vector3, Euler, MathUtils } from "three";
 
@@ -6,8 +6,8 @@ const CameraIntroMovement = () => {
   const { camera } = useThree();
 
   // Initial and final camera positions and rotations
-  const initialCameraPosition = new Vector3(0, 0.1, 100); // Change this to the initial position you want
-  const initialCameraRotation = new Euler(0, Math.PI, 0); // Change this to the initial rotation you want
+  const initialCameraPosition = new Vector3(0, 0.1, 20); // Change this to the initial position you want
+  const initialCameraRotation = new Euler(0, 0, 0); // Change this to the initial rotation you want
 
   const finalCameraPosition = new Vector3(0, 0.5, 8); // Change this to the final position you want
   const finalCameraRotation = new Euler(0, 0, 0); // Change this to the final rotation you want

@@ -1,13 +1,13 @@
 // External imports
-import { useRef } from "react";
-import { useFrame } from "react-three-fiber";
-import * as THREE from "three";
+import { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
 const Parallax = () => {
   // Reference to store the target position for the camera
   const targetPosition = useRef(new THREE.Vector3());
 
-  useFrame((state, _delta) => {
+  useFrame((state) => {
     // Calculate the target position based on the pointer input
     targetPosition.current.set(
       -Math.sin(state.pointer.x / 4) * 9,
@@ -19,7 +19,7 @@ const Parallax = () => {
     const lerpFactor = 0.05; // Adjust this value to control the smoothness (lower value = smoother)
     state.camera.position.lerp(targetPosition.current, lerpFactor);
 
-    // MAK_47e the camera look at the origin (0, 0, 0)
+    // Make the camera look at the origin (0, 0, 0)
     state.camera.lookAt(0, 0, 0);
   });
 

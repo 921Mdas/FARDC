@@ -1,16 +1,13 @@
 
 // External imports 
-import React, { useState, useEffect } from "react";
-import { Materials } from "./Materials";
-import { Text, Html, useGLTF, OrbitControls } from "@react-three/drei";
+import React from "react";
+import {Html, useGLTF, PerformanceMonitor } from "@react-three/drei";
 
 // internal imports
 import Contact from "./Contact";
 import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
-import { HelperButton,HelperButton3D } from "../Helper/Helper";
-import { faInstagram, faGithub, faXTwitter,} from '@fortawesome/free-brands-svg-icons';
+import { HelperButton} from "../Helper/Helper";
 // import FontAwesomeIcon
- import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { useStore } from "../store/store";
@@ -52,7 +49,8 @@ const Content = (props)=>{
 
 const WelcomePage = ({ SetShowLoadingPage }) => {
 
-  const {colors} = useStore(state => state)
+  const {colors, perfSucks, deprecate} = useStore(state => state)
+
 
 
   return (<Canvas
@@ -60,7 +58,8 @@ const WelcomePage = ({ SetShowLoadingPage }) => {
           position: [0, 2, 8],
           fov: 25,
         }}
-        shadows
+        performance={{ min: 0.1 }}
+        dpr={[1, perfSucks ? 1.5 : 2]}
         gl={{
           alpha: false,
           toneMapping: THREE.ACESFilmicToneMapping,
@@ -72,8 +71,11 @@ const WelcomePage = ({ SetShowLoadingPage }) => {
           gl.setClearAlpha(1);
           gl.gasoldier_head_bustaOutput = true;
         }}
-      >
+      >               
+              <PerformanceMonitor onDecline={() => deprecate(true)} />
+
               <group>
+            
                 <Parallax />
                 <Logo position={[3,-3,0]} />
                 <Content scale={0.5} position={[-1,-0.5,0]} />

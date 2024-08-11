@@ -1,27 +1,24 @@
 // External imports
-import React, {useState, Suspense} from 'react';
+import React, {useState} from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Center, Text3D, Html, Text } from '@react-three/drei';
+import {  Center, OrbitControls, PerformanceMonitor} from '@react-three/drei';
 import * as THREE from 'three';
 import { Leva } from 'leva';
 import { Physics, RigidBody } from "@react-three/rapier";
 
 
 // Internal imports (models and objects)
-import { Light } from './components/Light';
-import { Red_rose,VideoScene ,Guns, Bullets, Soldier_head_bust, White_rose, Skull,Congo_map, FARDC, MineralScene
+import  Light  from './components/Light';
+import {VideoScene, MAPCONGO ,Guns, Bullets, Stairs, Soldier_head_bust, White_rose, Skull,Congo_map, FARDC, MineralScene
  } from './components/GLBModels';
 import Pager from './Helper/Pager';
 import CameraIntroMovement from './components/CameraIntroMove';
 import { useStore } from './store/store';
-import ParagraphHelper from './Helper/Paragraph';
-import Parallax from './components/Parallax';
 import { TexturedPlane } from './components/Objects';
 import UI from './components/UI';
-import WelcomePage from './components/Welcome';
 // fonts
 import RobotoCondensedBold from "./assets/fonts/RbtcBold.ttf";
-// Textures
+
 
 
 
@@ -35,11 +32,12 @@ export const THREEJSCENE = () => {
     prev: false
   });
 
-  const {showLoadingPage, setShowLoadingPage} = useStore((state)=>({
-    showLoadingPage:  state.showLoadingPage,
-    setShowLoadingPage: state.setShowLoadingPage
-  }))
 
+  const {setShowLoadingPage, perfSucks, deprecate} = useStore((state)=>({
+    setShowLoadingPage: state.setShowLoadingPage,
+    perfSucks: state.perfSucks,
+    deprecate: state.deprecate
+  }))
   const handleHoverChange = (key, value) => {
     setHoverStates((prev) => ({
       ...prev,
@@ -58,12 +56,13 @@ export const THREEJSCENE = () => {
       overflow: "hidden",
     }}>
       <Canvas
+        performance={{ min: 0.1 }}
         camera={{
           position: [0, 2, 8],
           fov: 25,
         }}
         shadows
-        dpr={[1,2]}
+        dpr={[1, perfSucks ? 1.5 : 2]}
         gl={{
           alpha: false,
           toneMapping: THREE.ACESFilmicToneMapping,
@@ -76,17 +75,16 @@ export const THREEJSCENE = () => {
           gl.gasoldier_head_bustaOutput = true;
         }}
       > 
+      
                 <fog attach="fog" args={["white", 0, 40]} />
-                <Light />
                 <CameraIntroMovement /> 
-                {/* <OrbitControls /> */}
-
-
+                <Light />
+                <Pager />
+                <PerformanceMonitor onDecline={() => deprecate(true)} />
                 <UI SetShowLoadingPage={setShowLoadingPage} font={RobotoCondensedBold} 
                 hoverStates={hoverStates}
                 handleHoverChange={handleHoverChange}
                 />
-                <Pager />
                
 
                 <Physics gravity={[0, 0, 0.5]} >
@@ -98,25 +96,22 @@ export const THREEJSCENE = () => {
                                   <Guns />
                             </Center>
                       </group>
-                    
-                        <Skull />
                       <RigidBody colliders='cuboid' type='fixed' >
                            <TexturedPlane />
                       </RigidBody>
                       <group position={[0,0,-5]}>
                        <Bullets />
                       </group>
+                    
+                       <Skull />
                        <White_rose />
-                       <MineralScene />
+                       <MAPCONGO position={[-1.2,0.2,-20]} scale={0.6} />
                 </Physics>
 
-               <FARDC/>
-              <Congo_map />
-              <VideoScene />
-               
-                <Leva hidden />
+                 <FARDC/>
+                 <Stairs />
+                 <VideoScene />         
     
-        
       </Canvas>
     </div>
   );

@@ -1,6 +1,6 @@
 import './App.css';
 import  {THREEJSCENE}  from './ThreeJS';
-import { useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import {Leva} from 'leva'
 import WelcomePage from './components/Welcome';
 import { useStore } from './store/store';
@@ -20,11 +20,11 @@ function App() {
             <>
              <WelcomePage SetShowLoadingPage={setShowLoadingPage} />
              <Leva hidden={true} />
-            </>
-
-          
+            </>        
         : <Suspense fallback={<Loader />}>
              <THREEJSCENE />
+             <Leva hidden={true} />
+
           </Suspense>
   }
     </div>

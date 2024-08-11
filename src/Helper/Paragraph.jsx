@@ -1,6 +1,5 @@
-import React, { forwardRef, useEffect, useRef } from "react";
+import React, { forwardRef} from "react";
 import { Text } from "@react-three/drei";
-import * as THREE from "three";
 import { Vector3, Euler } from "three";
 
 // generate paragraphs and text
@@ -22,6 +21,8 @@ const ParagraphHelper =forwardRef(({
 
 
   return (
+    <group>
+
     <Text
       scale={scale}
       lineHeight={lineHeight}
@@ -33,12 +34,21 @@ const ParagraphHelper =forwardRef(({
       material={material}
       rotation={rotation}
       color={color}
+      characters="abcdefghijklmnopqrstuvwxyz0123456789!"
       ref={ref}
        textAlign = {textAlign}
+       stroke={0.1}
+       strokeColor={"#ff0000"}
+       strokeOpacity={1} 
+       thickness={0.05}
+
+
       
     >
       {text}
     </Text>
+
+    </group>
   );
 });
 

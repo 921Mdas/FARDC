@@ -1,30 +1,32 @@
 // External imports
 import React, { useEffect, useRef, useState, Suspense, useMemo } from 'react';
-import { useGLTF, Clone, Float, Text, Html  } from '@react-three/drei';
+import { useGLTF, Float, Image, Html, Center, useVideoTexture, Clone, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import {RigidBody } from "@react-three/rapier";
-import { gsap } from 'gsap';
-import { Image } from '@react-three/drei';
-import { useVideoTexture, Center } from '@react-three/drei';
+import { RigidBody } from "@react-three/rapier";
 import { useControls, button } from 'leva';
-
-
+import { proxy, useSnapshot } from 'valtio';
+import { easing } from 'maath';
+import { useFrame } from '@react-three/fiber';
 
 // Internal imports
-import {LoadModel, setCastShadow, ObjectAnimate, getExtremeRandom, AnimatedCounter} from '../Helper/Helper';
-import LinkHelper from '../Helper/Link';
-import {useStore} from '../store/store';
+import { setCastShadow, ObjectAnimate, getExtremeRandom, AnimatedCounter } from '../Helper/Helper';
+import { useStore } from '../store/store';
 import ParagraphHelper from '../Helper/Paragraph';
-import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
-import imagemap from '../assets/Images/map.png'
-import img01 from '../assets/Images/war01.jpg'
-import img02 from '../assets/Images/war02.jpeg'
-import img03 from '../assets/Images/war03.jpg'
-import img04 from '../assets/Images/bodies.webp'
-import img05 from '../assets/Images/refugees.jpg'
 
-// Glb models
-import Rose from '../GLBs/rose.glb';
+// Assets
+import RobotoCondensedBold from "../assets/fonts/RbtcBold.ttf";
+import imagemap from '../assets/Images/map.png';
+import img01 from '../assets/Images/war01.jpg';
+import img02 from '../assets/Images/war02.jpeg';
+import img03 from '../assets/Images/war03.jpg';
+import img04 from '../assets/Images/bodies.webp';
+import img05 from '../assets/Images/refugees.jpg';
+import img06 from '../assets/Images/war04.webp';
+import img07 from '../assets/Images/war05.avif';
+import img08 from '../assets/Images/war06.jpeg';
+import img09 from '../assets/Images/refugees.jpg';
+
+// GLB models
 import white_rose from '../GLBs/whiterose.glb';
 import skull_head from '../GLBs/realskull.glb';
 import pistol_original from '../GLBs/pistol.glb';
@@ -32,40 +34,23 @@ import pistol_clone_one from '../GLBs/pistol2.glb';
 import AK_47 from '../GLBs/ak47w.glb';
 import rifle from '../GLBs/rifle.glb';
 import white_knife from '../GLBs/whiteKnife.glb';
-import bullet from '../GLBs/bullet.glb'
-import congo_map from '../GLBs/ButemboMap.glb';
-import congo_map2 from '../GLBs/congomap.glb';
-import Titi from '../GLBs/congomap.glb';
-import soldier_head_bust from "../GLBs/mamadou.glb";
+import bullet from '../GLBs/bullet.glb';
+import soldier_head_bust from '../GLBs/mamadou.glb';
 import Skull_head from '../GLBs/realskull.glb';
 import Skull_head2 from '../GLBs/skull2.glb';
 import Skull_head3 from '../GLBs/realskull3.glb';
-import Hand from '../GLBs/hand2.glb';
-import Minerals from '../GLBs/minerals.glb';
-import MineralText from '../GLBs/mineraltext.glb';
-import Cemetery from '../GLBs/Cemetery.glb';
+import Cemetery from '../GLBs/newcemetery.glb';
+import steps from '../GLBs/stairs.glb';
+import Congo from '../GLBs/congo.glb';
+
+
+// Component imports
 import CurvedPlane from './Curvedscreen';
 
-// Rose 
-export function Red_rose(props) {
-  const { nodes, materials } = useGLTF(Rose);
 
-  return (
-    <group {...props} dispose={null}>
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.Object_2.geometry}
-        material={materials.poly_0}
-        rotation={[-0.33, -1.26, -3.60]}
-        position={[0.13, -0.2, 0.24]}
-      />
-    </group>
-  );
-}
 
 // whiterose
-export const White_rose = (props)=>{
+export const White_rose = ()=>{
   const model = useGLTF(white_rose)
   const roseref = useRef()
   ObjectAnimate('rosefwd',roseref);
@@ -75,26 +60,110 @@ export const White_rose = (props)=>{
 } 
 
 // FARDC
-export const FARDC = (_props)=>{
-  const material = new THREE.MeshBasicMaterial({color:'white'})
-  const toref = useRef()
-  const fardcref = useRef()
-  const dateref = useRef()
-  const contentrefone = useRef()
-  const contentreftwo = useRef()
-  const contentrefFour = useRef()
-  const contentrefFive = useRef()
-  const contentrefthree = useRef()
-  const contentimageref = useRef()
+const state = proxy({
+  clicked: null,
+  urls: [img01, img02,img03,img04,img05, img06, img07, img08, img09].map((u) => u)
+});
 
-  const { isSoldierAnimated,colors, currentNav } = useStore((state) => ({
+function Item({ index, position, scale, ...props }) {
+  const ref = useRef();
+  const [hovered, hover] = useState(false);
+
+
+ 
+
+  const over = () => hover(true);
+  const out = () => hover(false);
+
+ useFrame((_state, delta) => {
+  // Animate scale
+  easing.damp3(
+    ref.current.scale, 
+    hovered ? [scale[0] * 1.4, scale[1] * 1.2, 1.4] : scale, 
+    0.15, 
+    delta
+  );
+  
+  // Toggle grayscale
+  ref.current.material.grayscale = hovered ? 0 : 1;
+
+  
+  // Animate position on the z-axis
+  easing.damp3(
+    ref.current.position, 
+    hovered ? [ref.current.position.x, ref.current.position.y, ref.current.position.z] : [ref.current.position.x, ref.current.position.y, ref.current.position.z], 
+    0.15, 
+    delta
+  );
+  
+  // Animate color
+  easing.dampC(
+    ref.current.material.color, 
+    hovered ? 'white' : '#aaa', 
+    0.15, 
+    delta
+  );
+});
+
+
+
+
+  return <Image ref={ref} {...props} position={position} scale={scale} onPointerOver={over} onPointerOut={out} />;
+}
+
+function Items({ w = 0.7, gap = 0.20 }) {
+  const { urls } = useSnapshot(state);
+  const middleIndex = Math.floor(urls.length / 2);
+
+  return (
+    <group>
+      {urls.map((url, i) => {
+        const adjustedIndex = i - middleIndex;
+        const positionX = adjustedIndex * (w + gap );
+        return (
+          <Item
+            key={i}
+            index={i}
+            position={[Math.sin(positionX) - Math.cos(positionX), Math.random() * 0.5, Math.random() * -1.5]}
+            scale={[w, 4 * w, 1]}
+            url={url}
+          />
+        );
+      })}
+    </group>
+
+  );
+}
+
+export const FARDC = (_props) => {
+  const toref = useRef();
+  const fardcref = useRef();
+  const dateref = useRef();
+  const contentrefone = useRef();
+  const contentreftwo = useRef();
+  const contentrefFour = useRef();
+  const contentrefFive = useRef();
+  const contentrefthree = useRef();
+  const contentimageref = useRef();
+
+const contentRefThree2 = useRef();
+const contentRefThree3 = useRef();
+const contentRefThree4 = useRef();
+const contentrefFinal = useRef();
+
+
+  const { average } = useStore(state => state);
+  const reducedAvg = Math.floor(Math.abs(average * 0.1));
+  
+  
+
+  const { isSoldierAnimated, colors, currentNav } = useStore((state) => ({
     isSoldierAnimated: state.isSoldierAnimated,
-    currentNav:state.currentNav,
-    colors:state.colors,
+    currentNav: state.currentNav,
+    colors: state.colors,
     average: state.average,
   }));
 
- 
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
   useEffect(() => {
@@ -105,128 +174,212 @@ export const FARDC = (_props)=>{
     }
   }, [currentNav, isSoldierAnimated]);
 
- 
+  ObjectAnimate('to_headline', toref, isSoldierAnimated);
+  ObjectAnimate('fardc_headline', fardcref, isSoldierAnimated);
+  ObjectAnimate('date_headline', dateref, isSoldierAnimated);
+  ObjectAnimate('contentonefwd', contentrefone, isSoldierAnimated);
+  ObjectAnimate('contenttwofwd', contentreftwo, isSoldierAnimated);
+  ObjectAnimate('contentthreefwd', contentrefthree, isSoldierAnimated);
+  ObjectAnimate('contentfourfwd', contentrefFour, isSoldierAnimated);
+  ObjectAnimate('contentonebckwd', contentrefone, isSoldierAnimated);
+  ObjectAnimate('contenttwobckwd', contentreftwo, isSoldierAnimated);
+  ObjectAnimate('contentthreebckwd', contentrefthree, isSoldierAnimated);
+  ObjectAnimate('contentFourbckwd', contentrefFour, isSoldierAnimated);
+  ObjectAnimate('contentFivebckwd', contentrefFour, isSoldierAnimated);
+  ObjectAnimate('contentimagefwd', contentimageref, isSoldierAnimated);
+  ObjectAnimate('contentimagebckwd', contentimageref, isSoldierAnimated);
+  ObjectAnimate('contentref32fwd', contentRefThree2, isSoldierAnimated);
+  ObjectAnimate('contentref32bckwd', contentRefThree2, isSoldierAnimated);
+  ObjectAnimate('contentref33fwd', contentRefThree3, isSoldierAnimated);
+  ObjectAnimate('contentref33bckwd', contentRefThree3, isSoldierAnimated);
+  ObjectAnimate('contentrefFinalfwd', contentrefFinal, isSoldierAnimated);
+  ObjectAnimate('contentrefFinalbckwd', contentrefFinal, isSoldierAnimated);
+
+  const introText = `The war in Congo, also known as the Second Congo War,\nbegan in 1998 and has resulted in widespread violence,\ndisplacement, and humanitarian crises.`
+  const causeText =  `Driven by control over the country’s vast mineral resources,\nthe conflict has seen the involvement of multiple armed groups\nand neighboring countries.`
+  const concludeText = `Despite peace agreements,\nthe conflict has left lasting scars on the region,\nwith millions of people dead and ongoing instability.`
+
+const textStyle = {
+  width: '30vw',
+  border: 'solid 1px red',
+  lineHeight: '2rem',
+  textAlign: 'right',
+  padding: '1em',
+  fontSize: '1.2em',
+  backgroundColor: 'white',
+  borderRadius: '0.1em',
+  background: 'rgba(255, 255, 255, 0.3)', // Background color with 50% opacity
+  backdropFilter: 'blur(4.5px)', // Blur effect for the background
+  WebkitBackdropFilter: 'blur(4.5px)', // Vendor prefix for blur effect
+  borderRadius: '1px', // Rounded corners
+  border: '1px solid rgba(255, 255, 255, 0.3)', // Border with semi-transparent color
+  color: colors.lightred,
+  perspective: '1600px', // Perspective depth
+  transform: `rotateZ(-3deg) `,
+  transformStyle: 'preserve-3d',
+};
+
+const textStyle1 = {
+  width: '30vw',
+  border: 'solid 1px red',
+  lineHeight: '2rem',
+  padding: '1em',
+  fontSize: '1.2em',
+  backgroundColor: 'white',
+  borderRadius: '0.1em',
+  background: 'rgba(255, 255, 255, 0.3)', // Background color with 50% opacity
+  backdropFilter: 'blur(4.5px)', // Blur effect for the background
+  WebkitBackdropFilter: 'blur(4.5px)', // Vendor prefix for blur effect
+  borderRadius: '1px', // Rounded corners
+  border: '1px solid rgba(255, 255, 255, 0.3)', // Border with semi-transparent color
+  color: colors.lightred,
+  fontWeight:'bold'
+
+};
+
+const textStyle2 = {
+  width: '30vw',
+  border: 'solid 1px red',
+  lineHeight: '2rem',
+  textAlign: 'right',
+  padding: '1em',
+  fontSize: '1.2em',
+  backgroundColor: 'white',
+  borderRadius: '0.1em',
+  background: 'rgba(255, 255, 255, 0.3)', // Background color with 50% opacity
+  backdropFilter: 'blur(4.5px)', // Blur effect for the background
+  WebkitBackdropFilter: 'blur(4.5px)', // Vendor prefix for blur effect
+  borderRadius: '1px', // Rounded corners
+  border: '1px solid rgba(255, 255, 255, 0.3)', // Border with semi-transparent color
+  color: colors.lightred,
+  perspective: '1600px', // Perspective depth
+  transform: `rotateZ(3deg) `,
+  transformStyle: 'preserve-3d',
+};
+const textStyle3 = {
+
+  width: '30vw',
+  border: 'solid 1px red',
+  lineHeight: '2rem',
+  textAlign: 'right',
+  padding: '1em',
+  fontSize: '1.2em',
+  backgroundColor: 'white',
+  borderRadius: '0.1em',
+  background: 'rgba(255, 255, 255, 0.3)', // Background color with 50% opacity
+  backdropFilter: 'blur(4.5px)', // Blur effect for the background
+  WebkitBackdropFilter: 'blur(4.5px)', // Vendor prefix for blur effect
+  borderRadius: '1px', // Rounded corners
+  border: '1px solid rgba(255, 255, 255, 0.3)', // Border with semi-transparent color
+  color: colors.lightred,
+  perspective: '1600px', // Perspective depth
+  transform: `rotateZ(1deg) `,
+  transformStyle: 'preserve-3d',
+};
 
 
-  ObjectAnimate('to_headline',toref, isSoldierAnimated);
-  ObjectAnimate('fardc_headline',fardcref, isSoldierAnimated);
-  ObjectAnimate('date_headline',dateref, isSoldierAnimated);
-  ObjectAnimate('contentonefwd',contentrefone, isSoldierAnimated);
-  ObjectAnimate('contenttwofwd',contentreftwo, isSoldierAnimated);
-  ObjectAnimate('contentthreefwd',contentrefthree, isSoldierAnimated);
-  ObjectAnimate('contentfourfwd',contentrefFour, isSoldierAnimated);
-  // ObjectAnimate('contentfivefwd',contentrefFour, isSoldierAnimated);
-
-  ObjectAnimate('contentonebckwd',contentrefone, isSoldierAnimated);
-  ObjectAnimate('contenttwobckwd',contentreftwo, isSoldierAnimated);
-  ObjectAnimate('contentthreebckwd',contentrefthree, isSoldierAnimated);
-  ObjectAnimate('contentFourbckwd',contentrefFour, isSoldierAnimated);
-  ObjectAnimate('contentFivebckwd',contentrefFour, isSoldierAnimated);
-  ObjectAnimate('contentimagefwd',contentimageref, isSoldierAnimated);
-  ObjectAnimate('contentimagebckwd',contentimageref, isSoldierAnimated);
-  
-  return <>
-  <ParagraphHelper ref={toref} scale={0.3} text={`TO`} position={[0.45 ,1.8,-0.1]} color={colors.lightred} font={RobotoCondensedBold} />
-  <ParagraphHelper ref={fardcref} scale={0.3} text={`F.A.R.D.C\nHEROES`} position={[-1.53,0.3,-0.1]} color={colors.lightred} font={RobotoCondensedBold} />
-  <ParagraphHelper ref={dateref} font={RobotoCondensedBold} scale={0.07} position={[0.3,-0.22,3]} text={`FIGHTING SINCE 1993`}  color={colors.lightred} />
-  <ParagraphHelper  textAlign={'right'} ref={contentrefone} font={RobotoCondensedBold}  scale={0.06} lineHeight={1.3} position={[-10,1.3,3]} rotation={[0,-0.1,0]} text={`The DR Congo's decades-long conflict,\ndriven by control over\nits vast mineral wealth`}  color='darkred' />
-
-  <group position={[0,10,0]} ref={contentrefthree} >
-  <AnimatedCounter scale={2} position={[-0.9,2.1,0]} shouldAnimate={shouldAnimate} />
-  </group>
-
-  <ParagraphHelper  textAlign={'left'} ref={contentrefFour} font={RobotoCondensedBold}  scale={0.06} lineHeight={1.3} position={[10,0.5,3]} rotation={[0,0,0]} text={`Despite multiple deaths\nThese persecuted women and children\nhave not had peace`}  color='darkred' />
-  {/* <ParagraphHelper  textAlign={'right'} ref={contentrefFive} font={RobotoCondensedBold}  scale={0.06} lineHeight={1.3} position={[-10,1.3,3]} rotation={[0,0,0]} text={`Despite multiple deaths\nThese persecuted women and children\nhave not had peace`}  color='darkred' /> */}
-  {/* <ParagraphHelper  textAlign={'center'} font={RobotoCondensedBold}  scale={0.2} lineHeight={1.5} position={[-0.8,6,0]} rotation={[0,0,0]} text={0}  color='darkred' /> */}
-
-
-     <group ref={contentreftwo} position={[10,0,0]} >
-      <ParagraphHelper scale={0.06} font={RobotoCondensedBold} lineHeight={1.3} textAlign={'left'}  position={[0,1,3]} rotation={[0,-0.4,0]} text={`Multinationals sponsorship to rebels\nto exploit for cheap minerals\ncaused misery and death for locals.` }  color='darkred' />
-    </group>
-    <group ref={contentimageref} position={[0,-10,0]}>
-     <Image position={[0.5, 1.3, 0]} rotation={[0,0,0]} scale={1.5} url={imagemap} />
-      <Float floatIntensity={Math.random()* 0.5} floatingRange={[0,0.2]} rotationIntensity={0.3}>
-      <Image position={[-0.4, 0.5, 0.5]} rotation={[0,0,0]} scale={[0.8,0.8,0.8]} url={img01} />
-      </Float>
-      <Float floatIntensity={Math.random()* 0.5} floatingRange={[0,0.2]} rotationIntensity={0.3}>
-        <Image position={[0.4, 0, 0.6]} rotation={[0,-0.5,0]} scale={1} url={img02} />
-      </Float>
-      <Float floatIntensity={Math.random()* 0.5} floatingRange={[0,0.2]} rotationIntensity={0.3}>
-        <Image position={[-0.8, 1.4, 0]} rotation={[0,0.5,0]} scale={1} url={img03} />
-      </Float>
-      <Float floatIntensity={Math.random()* 0.5} floatingRange={[0,0.2]} rotationIntensity={0.3}>
-        <Image position={[-1.2, 0.3, 0]} rotation={[0,0.5,0]} scale={0.8} url={img04} />
-      </Float>
-      <Float floatIntensity={Math.random()* 0.5} floatingRange={[0,0.2]} rotationIntensity={0.3}>
-       <Image position={[1.5, 1, 0]} rotation={[0,0.5,0]} scale={1} url={img05} />
-       </Float>
-      {/* <LinkHelper
-        scale={0.06}
-        lineHeight={1.5}
-        anchorX={-10}
-        anchorY={2.5}
-        position={[-0.15,0,2]}
-        text={`Learn more`}
-        color="darkred"
-        rotation={[0,0,0]}
-        material={material}
-        font={RobotoCondensedBold}
-        fnClick={() => window.open("https://x.com/DeoGrat82092763", "_blank")}
-      /> */}
-    </group>
-  
-   
-
-     
-  
-  </>
-  
-
-}
-
-export const Congo_map = (props)=>{
-  const model = useGLTF(Titi);
-  const mapref = useRef();
-  ObjectAnimate('mapfwd',mapref);
-  ObjectAnimate('mapbckwd',mapref);
 
   return (
-   <primitive ref={mapref} scale={1} position={[0,-10,0.5]} object={model.scene} />
-  )
+    <>
+      <ParagraphHelper ref={toref} scale={0.3} text={`TO`} position={[0.45, 1.8, -0.1]} color={colors.lightred} font={RobotoCondensedBold} />
+      <ParagraphHelper ref={fardcref} scale={0.3} text={`F.A.R.D.C\nHEROES`} position={[-1.53, 0.3, -0.1]} color={colors.lightred} font={RobotoCondensedBold} />
+      <ParagraphHelper ref={dateref} font={RobotoCondensedBold} scale={0.07} position={[0.3, -0.22, 3]} text={`FIGHTING SINCE 1998`} color={colors.lightred} />
+      
+      
+      <group position={[-10, 1.4, 3]} ref={contentrefone}>
+        <Html >
+          <div style={textStyle3} >
+            {introText}
+          </div>
+        </Html>
+        {/* <ParagraphHelper textAlign={'right'} ref={contentrefone} font={RobotoCondensedBold} scale={0.06} lineHeight={1.3} position={[-10, 1.3, 3]} rotation={[0, 0, 0]} text={introText} color='darkred' /> */}
+      </group>
+
+       <group ref={contentreftwo} position={[10, 1, 0]}>
+        <Html >
+          <div  style={textStyle2}>
+            {causeText}
+          </div>
+        </Html>
+        {/* <ParagraphHelper textAlign={'right'} ref={contentrefone} font={RobotoCondensedBold} scale={0.06} lineHeight={1.3} position={[-10, 1.3, 3]} rotation={[0, 0, 0]} text={introText} color='darkred' /> */}
+      </group>
+
+       <group position={[10, 0, 0]} ref={contentrefFour}>
+        <Html >
+          <div style={textStyle}>
+            {concludeText}
+          </div>
+        </Html>
+        {/* <ParagraphHelper textAlign={'right'} ref={contentrefone} font={RobotoCondensedBold} scale={0.06} lineHeight={1.3} position={[-10, 1.3, 3]} rotation={[0, 0, 0]} text={introText} color='darkred' /> */}
+      </group>
+       <group ref={contentrefFinal} position={[-1, 10, 0]}>
+        <Html >
+          <div style={textStyle1}  >
+            World's deadliest since World War II
+          </div>
+        </Html>
+        {/* <ParagraphHelper textAlign={'right'} ref={contentrefone} font={RobotoCondensedBold} scale={0.06} lineHeight={1.3} position={[-10, 1.3, 3]} rotation={[0, 0, 0]} text={introText} color='darkred' /> */}
+      </group>
+
+       {/* <group ref={contentreftwo} position={[10, 0, 0]}>
+        <ParagraphHelper scale={0.06} font={RobotoCondensedBold} lineHeight={1.3} textAlign={'left'} position={[0, 1, 3]} rotation={[0, 0, 0]} text={causeText} color='darkred' />
+      </group> */}
+
+
+
+      <group position={[0, 15, 0]} ref={contentrefthree}>
+        <AnimatedCounter scale={1} position={[-0.5, 2.5, 0]} shouldAnimate={shouldAnimate} subtext={'DEAD'} countTo={5400000}/>
+      </group>
+      <group position={[0, 10, 0]} ref={contentRefThree2}>
+        <AnimatedCounter scale={1} position={[0, 1.35, 0]} shouldAnimate={shouldAnimate} subtext={'DISPLACED'} countTo={7000000}/>
+      </group>
+      <group position={[0, 8, 0]} ref={contentRefThree3}>
+        <AnimatedCounter scale={1} position={[0.75, 0.75, 0]} shouldAnimate={shouldAnimate} subtext={'RAPED'} countTo={200000}/>
+      </group>
+
+     
+      {/* <ParagraphHelper textAlign={'left'} ref={contentrefFour} font={RobotoCondensedBold} scale={0.06} lineHeight={1.3} position={[10, 0.5, 3]} rotation={[0, 0, 0]} text={concludeText} color='darkred' /> */}
+      <group ref={contentimageref} position={[0, -10, 0]}>
+        <Items w={0.5} gap={0.2} />
+      </group>
+    </>
+  );
+};
+
+export const Stairs = ()=>{
+
+  const stairef = useRef();
+
+  const {scene} = useGLTF(steps)
+  // const bakedTexture = useTexture('/texture/bakedstairs.jpg'); // Adjust the path to your texture file
+  // bakedTexture.flipY = false;
+
+  // Traverse the scene to apply the texture to all materials
+  scene.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true
+      // child.material.map = bakedTexture;
+      // child.material.needsUpdate = true; // Ensure the material updates
+    }
+  });
+
+  ObjectAnimate('staireffwd', stairef);
+  ObjectAnimate('stairefbckwd', stairef);
+
+  return <primitive object={scene} ref={stairef} scale={0.5} position={[-1.5,-10,0.5]} rotation={[0,-0.5,0]} />
 }
 
-export const MineralScene = (props)=>{
-  const hand = useGLTF(Hand);
-  const minerals = useGLTF(Minerals);
-  const mineraltext = useGLTF(MineralText);
-  const mineralref = useRef()
- 
+export const  MAPCONGO = (props)=>{
+  const model = useGLTF(Congo);
+  const ref = useRef()
 
-  
-  ObjectAnimate('mineralfwd',mineralref);
-  ObjectAnimate('mineralbckwd',mineralref);
-
-  setCastShadow(hand.scene)
-  setCastShadow(minerals.scene)
-  setCastShadow(mineraltext.scene)
-
-    mineraltext.scene.traverse(
-      (child)=>{
-          if(child.isMesh){
-            child.material = new THREE.MeshStandardMaterial({color:'white', roughness:0})
-          }
-      }
-    )
+  ObjectAnimate('congofwd', ref);
+  ObjectAnimate('congobckwd', ref);
 
 
-  return <group ref={mineralref} position={[0,-10,-60]}>
-   {/* <primitive   object={hand.scene} scale={0.8} position={[0,0.5,0]} rotation={[0,5.35,-0.4]} /> */}
-   <primitive   object={minerals.scene} scale={0.1} rotation={[0.4,5.35,0]} position={[-1,-0.5,3]} />
-   <primitive   object={mineraltext.scene}  position={[0,-0.39,2]} scale={0.2} rotation={[0,5.35,0]} />
-
-  </group>
-
+  return <primitive ref={ref} {...props} object={model.scene} />
 }
+
 
 export const Soldier_head_bust = (props)=>{
   
@@ -256,7 +409,6 @@ export const Soldier_head_bust = (props)=>{
 
 // Clones of bullets
 export const Bullets = () => {
-  const {colors} = useStore(store=>store)
   const model = useGLTF(bullet);
   const whiteMaterial = new THREE.MeshStandardMaterial({ color: 'red', roughness: 0, metalness: 1 });
  
@@ -364,45 +516,40 @@ export const Skull = (props) => {
   const { scene } = useGLTF(Skull_head);
   const skull2 = useGLTF(Skull_head2);
   const skull3 = useGLTF(Skull_head3);
-  const cemetery = useGLTF(Cemetery)
+  // const cemetery = useGLTF(Cemetery)
 
 
   ObjectAnimate('skullfwd',skullRef);
   ObjectAnimate('skullbckwd',skullRef);
-  ObjectAnimate('cemeteryfwd',cemeteryRef);
-  ObjectAnimate('cemeterybckwd',cemeteryRef);
+  // ObjectAnimate('cemeteryfwd',cemeteryRef);
+  // ObjectAnimate('cemeterybckwd',cemeteryRef);
 
-  ObjectAnimate('skull2fwd',skullRef2);
-  ObjectAnimate('skull2bckwd',skullRef2);
+  // ObjectAnimate('skull2fwd',skullRef2);
+  // ObjectAnimate('skull2bckwd',skullRef2);
 
-  ObjectAnimate('skull3fwd',skullRef3);
-  ObjectAnimate('skull3bckwd',skullRef3);
+  // ObjectAnimate('skull3fwd',skullRef3);
+  // ObjectAnimate('skull3bckwd',skullRef3);
 
 
 
   return (
      <mesh castShadow receiveShadow >
-        <primitive ref={skullRef}  object={scene} scale={0.5} position={[0, -3, -0.48]} rotation={[-0.25, Math.PI * -0.25, 0.5]} />
-        <primitive ref={skullRef2}  object={skull2.scene} scale={0.4} position={[-1.5, -10, -2]} rotation={[-0.25, 0, 0]} />
-        <primitive ref={skullRef3} object={skull3.scene} scale={0.3} position={[1, -10, -2.5]} rotation={[-1.5, 1.2, 0]} />
-        <primitive ref={cemeteryRef} object={cemetery.scene} rotation={[0,Math.PI * -0.5,0]} position={[0,-5,0]} />
+        <primitive ref={skullRef}  object={scene} scale={0.5} position={[0, -3, -0.48]} rotation={[0.1, Math.PI * -0.25, 0.5]} />
+        {/* <primitive ref={skullRef2}  object={skull2.scene} scale={0.4} position={[-1.5, -10, -2]} rotation={[-0.25, 0, 0]} />
+        <primitive ref={skullRef3} object={skull3.scene} scale={0.3} position={[1, -10, -2.5]} rotation={[-1.5, 1.2, 0]} /> */}
+        {/* <primitive ref={cemeteryRef} object={cemetery.scene} rotation={[0,Math.PI  * 0.5,0]} position={[0,-5,0]} /> */}
     </mesh>
   );
 };
 
-const films = {
+// Video
+
+export const VideoScene = (props)=>{
+  const films = {
   Sintel: '/xy.mp4',
-  // 'Big Buck Bunny': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-  // 'Elephant Dream': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-  // 'For Bigger Blazes': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-  // 'For Bigger Joy Rides': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-  // youtube:'https://www.youtube.com/embed/BF9WE5VE5WI?si=exsxnvgxyupn0NoV',
 }
 
 const { DEG2RAD } = THREE.MathUtils
-
-
-export const VideoScene = (props)=>{
   const [stream, setStream] = useState(new MediaStream())
 
   const { url } = useControls({
@@ -464,7 +611,6 @@ function VideoMaterial({ src, setVideo }) {
 
 // Preload GLTF models
  [
-  Rose,
   white_rose,
   skull_head,
   pistol_original,
@@ -473,8 +619,6 @@ function VideoMaterial({ src, setVideo }) {
   rifle,
   white_knife,
   bullet,
-  congo_map,
-  Titi,
   soldier_head_bust
 ].forEach((mesh) => {
   useGLTF.preload(mesh);
